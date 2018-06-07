@@ -26,6 +26,12 @@ int main(int argc, char** argv) {
     
     ConvolutionLayer cl( depth, height, width, filterSize, stride, noOfFilters, padding);
     
+    Eigen::MatrixXd input[1];
+    Eigen::MatrixXd img = Eigen::MatrixXd::Ones(20,20);
+    input[0] = img;
+    
+    cl.convolute(input);
+    
     return 0;
 }
 
