@@ -14,7 +14,7 @@
 class PoolLayer {
 public:
     /**
-     * Initialize output matrix
+     * Constructor
      * 
      * @param depth: depth of the input matrix
      * @param height: height of the input matrix
@@ -33,7 +33,8 @@ public:
      */
     virtual ~PoolLayer();
     /**
-     * initialize matrices
+     * Initialize output matrix
+     * 
      * @return 0
      */
     int initMat();

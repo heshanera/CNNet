@@ -33,9 +33,9 @@ int PoolLayer::initMat() {
     
     maxIndices = new Eigen::MatrixXd * [depth];
     for (int i = 0; i < depth; i++) {
-        maxIndices[i] = new Eigen::MatrixXd[outHeight];
-        for (int j = 0; j < outHeight; j++) {
-            maxIndices[i][j] = Eigen::MatrixXd::Zero(outWidth,2);
+        maxIndices[i] = new Eigen::MatrixXd[outWidth];
+        for (int j = 0; j < outWidth; j++) {
+            maxIndices[i][j] = Eigen::MatrixXd::Zero(outHeight,2);
         }
     }
     return 0;

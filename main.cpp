@@ -8,6 +8,7 @@
 #include <iostream>
 #include "ConvolutionLayer.hpp"
 #include "PoolLayer.hpp"
+#include "FCLayer.hpp"
 
 using namespace std;
 
@@ -17,6 +18,7 @@ using namespace std;
 int main(int argc, char** argv) {
 
     ///////////////////////////////////////////////////////////////
+    
     int depth = 1;
     int height = 20;
     int width = 20; 
@@ -33,8 +35,8 @@ int main(int argc, char** argv) {
     
     cl.convolute(input);
   
-    
     ///////////////////////////////////////////////////////////////
+    
     depth = noOfFilters;
     int poolW = 2;
     int poolH = 2;
@@ -44,9 +46,14 @@ int main(int argc, char** argv) {
         inputPl[j] = img;
     }
     
-    
-    PoolLayer pl( depth, height, width, poolW, poolH);
+    PoolLayer pl(depth, height, width, poolW, poolH);
     pl.pool(inputPl);
+    
+    ///////////////////////////////////////////////////////////////
+    
+    int outputs = 2;
+    
+    FCLayer fcl(depth, height, width, outputs);
     
     ///////////////////////////////////////////////////////////////
     

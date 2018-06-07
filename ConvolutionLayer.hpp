@@ -15,7 +15,7 @@
 class ConvolutionLayer {
 public:
     /**
-     * Initialize weight matrices and the bias values for the convolutional layer
+     * Constructor
      * 
      * @param depth: depth of the input matrix
      * @param height: height of the input matrix
@@ -35,7 +35,8 @@ public:
      */
     virtual ~ConvolutionLayer();
     /**
-     * initialize matrices
+     * Initialize weight matrices and the bias values for the convolutional layer
+     * 
      * @return 0
      */
     int initMat();
