@@ -7,16 +7,24 @@
 
 #include "ConvolutionLayer.hpp"
 
-ConvolutionLayer::ConvolutionLayer(int depth, int height, int width, int filterSize, int displace, int noOfFilters, int padding = 0) { 
+ConvolutionLayer::ConvolutionLayer(int depth, int height, int width, int filterSize, int stride, int noOfFilters, int padding = 0) { 
     
     this->depth = depth;
     this->height = height;
     this->width = width;
     this->filterSize = filterSize;
-    this->displace = displace;
+    this->stride = stride;
     this->noOfFilters = noOfFilters;
     this->padding = padding;
-    
+    initMat();
+}
+
+ConvolutionLayer::ConvolutionLayer(const ConvolutionLayer& orig) { }
+
+ConvolutionLayer::~ConvolutionLayer() { }
+
+int ConvolutionLayer::initMat() {
+
     // generating filter weight matrix array
     // depth * filterSize * filterSize * noOfFilters
     
@@ -49,29 +57,26 @@ ConvolutionLayer::ConvolutionLayer(int depth, int height, int width, int filterS
         bias[i] = (min + ((double)rand() / RAND_MAX) * diff);
     }
     
-    this->outHeight = (int)((height - filterSize + 2*padding)/displace) + 1; // rows
-    this->outWidth = (int)((width - filterSize + 2*padding)/displace) + 1; // columns
+    this->outHeight = (int)((height - filterSize + 2*padding)/stride) + 1; // rows
+    this->outWidth = (int)((width - filterSize + 2*padding)/stride) + 1; // columns
    
     output = new Eigen::MatrixXd[noOfFilters];
     for (int i = 0; i < noOfFilters; i++) {
         Eigen::MatrixXd outVal = Eigen::MatrixXd::Zero(outHeight,outWidth);
         output[i] = outVal;
     }
+    return 0;
 }
 
-ConvolutionLayer::ConvolutionLayer(const ConvolutionLayer& orig) { }
-
-ConvolutionLayer::~ConvolutionLayer() { }
 
 Eigen::MatrixXd *  ConvolutionLayer::convolute(Eigen::MatrixXd * input) {
-    
     
     for (int i = 0; i < noOfFilters; i++) {
         Eigen::MatrixXd filter = filters[i /*filter*/][0 /*depth*/];
         Eigen::Map<Eigen::RowVectorXd> filterV(filter.data(), filter.size());
         
-        for (int x = 0; x < outWidth; x+=displace) {
-            for (int y = 0; y < outHeight; y+=displace) {
+        for (int x = 0; x < outWidth; x+=stride) {
+            for (int y = 0; y < outHeight; y+=stride) {
                 Eigen::MatrixXd inputBlock = input[0 /*depth*/].block(y,x,filterSize,filterSize);
                 Eigen::Map<Eigen::RowVectorXd> inputBlockV(inputBlock.data(), inputBlock.size());
                 output[i](y,x) = Activation::sigmoid(inputBlockV.dot(filterV) + bias[i]);    

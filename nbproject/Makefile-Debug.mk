@@ -37,6 +37,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 OBJECTFILES= \
 	${OBJECTDIR}/Activation.o \
 	${OBJECTDIR}/ConvolutionLayer.o \
+	${OBJECTDIR}/PoolLayer.o \
 	${OBJECTDIR}/main.o
 
 
@@ -73,6 +74,11 @@ ${OBJECTDIR}/ConvolutionLayer.o: ConvolutionLayer.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -IEigen -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ConvolutionLayer.o ConvolutionLayer.cpp
+
+${OBJECTDIR}/PoolLayer.o: PoolLayer.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -IEigen -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PoolLayer.o PoolLayer.cpp
 
 ${OBJECTDIR}/main.o: main.cpp
 	${MKDIR} -p ${OBJECTDIR}

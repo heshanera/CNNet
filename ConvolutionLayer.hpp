@@ -21,11 +21,11 @@ public:
      * @param height: height of the input matrix
      * @param width: width of the input matrix
      * @param filterSize: size of the filter N, (N x N) 
-     * @param displace: displacement units of the filter
+     * @param stride: displacement units of the filter
      * @param noOfFilters: no of filters
      * @param padding
      */
-    ConvolutionLayer(int depth, int height, int width, int filterSize, int displace, int noOfFilters, int padding);
+    ConvolutionLayer(int depth, int height, int width, int filterSize, int stride, int noOfFilters, int padding);
     /**
      * 
      * @param orig
@@ -34,7 +34,11 @@ public:
     /**
      */
     virtual ~ConvolutionLayer();
-    
+    /**
+     * initialize matrices
+     * @return 0
+     */
+    int initMat();
     /**
      * Apply the convolution operation to the image using the generated filters
      * 
@@ -44,7 +48,7 @@ public:
     Eigen::MatrixXd * convolute(Eigen::MatrixXd * input);
     
 private:
-    int depth, height, width, filterSize, displace, noOfFilters, padding = 0;
+    int depth, height, width, filterSize, stride, noOfFilters, padding = 0;
     int outHeight, outWidth;
     double * bias;
     Eigen::MatrixXd ** filters;
