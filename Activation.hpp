@@ -9,6 +9,7 @@
 #define ACTIVATION_HPP
 
 #include <cmath>
+#include <Eigen>
 
 class Activation {
 public:
@@ -17,6 +18,7 @@ public:
     virtual ~Activation();
     
     static double sigmoid(double);
+    static Eigen::MatrixXd sigmoid(Eigen::MatrixXd);
     static double sigmoidDeriv(double);
     
 private:

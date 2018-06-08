@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <Eigen>
+#include "Activation.hpp"
 
 class FCLayer {
 public:
@@ -39,14 +40,15 @@ public:
     int initMat();
     /**
      * 
-     * @return output class vector
+     * @param input: input matrix 
+     * @return 
      */
-    Eigen::RowVectorXd forward();
+    Eigen::RowVectorXd forward(Eigen::MatrixXd * input);
 private:
     int depth, height, width, outputs;
     Eigen::MatrixXd ** weights;
-    Eigen::RowVectorXd bias;
-    Eigen::RowVectorXd target;
+    Eigen::MatrixXd bias;
+    Eigen::MatrixXd output;
     
 };
 

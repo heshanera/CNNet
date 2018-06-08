@@ -47,13 +47,16 @@ int main(int argc, char** argv) {
     }
     
     PoolLayer pl(depth, height, width, poolW, poolH);
-    pl.pool(inputPl);
+    Eigen::MatrixXd * inputFcl = pl.pool(inputPl);
     
     ///////////////////////////////////////////////////////////////
     
     int outputs = 2;
+    height = inputFcl[0].rows();
+    width = inputFcl[0].cols();
     
     FCLayer fcl(depth, height, width, outputs);
+    fcl.forward(inputFcl);
     
     ///////////////////////////////////////////////////////////////
     
