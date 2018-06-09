@@ -14,15 +14,14 @@
 
 class FCLayer {
 public:
+    FCLayer();
     /**
      * Constructor
      * 
-     * @param depth: depth of the input matrix
-     * @param height: height of the input matrix
-     * @param width: width of the input matrix
+     * @param dimensions: dimensions of the input matrix (depth, height, width)
      * @param outputs: no of outputs
      */
-    FCLayer(int depth, int height, int width, int outputs);
+    FCLayer(std::tuple<int, int, int> dimensions, int outputs);
     /**
      * 
      * @param orig

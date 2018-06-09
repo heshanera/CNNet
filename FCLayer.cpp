@@ -7,10 +7,12 @@
 
 #include "FCLayer.hpp"
 
-FCLayer::FCLayer(int depth, int height, int width, int outputs) {
-    this->depth = depth;
-    this->height = height;
-    this->width = width;
+FCLayer::FCLayer() { }
+
+FCLayer::FCLayer(std::tuple<int, int, int> dimensions, int outputs) {
+    this->depth = std::get<0>(dimensions);
+    this->height = std::get<1>(dimensions);
+    this->width = std::get<2>(dimensions);
     this->outputs = outputs;
     initMat();
 }

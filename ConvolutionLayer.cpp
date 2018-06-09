@@ -7,11 +7,13 @@
 
 #include "ConvolutionLayer.hpp"
 
-ConvolutionLayer::ConvolutionLayer(int depth, int height, int width, int filterSize, int stride, int noOfFilters, int padding = 0) { 
+ConvolutionLayer::ConvolutionLayer() { }
+
+ConvolutionLayer::ConvolutionLayer(std::tuple<int, int, int> dimensions, int filterSize, int stride, int noOfFilters, int padding = 0) { 
     
-    this->depth = depth;
-    this->height = height;
-    this->width = width;
+    this->depth = std::get<0>(dimensions);
+    this->height = std::get<1>(dimensions);
+    this->width = std::get<2>(dimensions);
     this->filterSize = filterSize;
     this->stride = stride;
     this->noOfFilters = noOfFilters;
@@ -90,4 +92,8 @@ Eigen::MatrixXd *  ConvolutionLayer::convolute(Eigen::MatrixXd * input) {
 //    }    
     
     return output;
+}
+
+std::tuple<int, int, int> ConvolutionLayer::getOutputDims() {
+    return std::make_tuple(noOfFilters, outHeight, outWidth);
 }

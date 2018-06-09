@@ -13,16 +13,15 @@
 
 class PoolLayer {
 public:
+    PoolLayer();
     /**
      * Constructor
      * 
-     * @param depth: depth of the input matrix
-     * @param height: height of the input matrix
-     * @param width: width of the input matrix
+     * @param dimensions: dimensions of the input matrix (depth, height, width)
      * @param poolW: pool matrix width
      * @param poolH: pool matrix height
      */
-    PoolLayer(int depth, int height, int width, int poolW, int poolH);
+    PoolLayer(std::tuple<int, int, int> dimensions, int poolW, int poolH);
     /**
      * 
      * @param orig
@@ -44,6 +43,12 @@ public:
      * @return 
      */
     Eigen::MatrixXd * pool(Eigen::MatrixXd * input);
+    /**
+     * Return the dimension of the layer output
+     * 
+     * @return a tuple
+     */
+    std::tuple<int, int, int> getOutputDims();
 private:
     int depth, height, width, poolW, poolH;
     int outHeight, outWidth;

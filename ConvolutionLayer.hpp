@@ -14,18 +14,17 @@
 
 class ConvolutionLayer {
 public:
+    ConvolutionLayer();
     /**
      * Constructor
      * 
-     * @param depth: depth of the input matrix
-     * @param height: height of the input matrix
-     * @param width: width of the input matrix
+     * @param dimensions: dimensions of the input matrix (depth, height, width)
      * @param filterSize: size of the filter N, (N x N) 
      * @param stride: displacement units of the filter
      * @param noOfFilters: no of filters
      * @param padding
      */
-    ConvolutionLayer(int depth, int height, int width, int filterSize, int stride, int noOfFilters, int padding);
+    ConvolutionLayer(std::tuple<int, int, int> dimensions, int filterSize, int stride, int noOfFilters, int padding);
     /**
      * 
      * @param orig
@@ -47,6 +46,12 @@ public:
      * @return an array of convoluted images (array size = no of filters)
      */
     Eigen::MatrixXd * convolute(Eigen::MatrixXd * input);
+    /**
+     * Return the dimension of the layer output
+     * 
+     * @return a tuple
+     */
+    std::tuple<int, int, int> getOutputDims();
     
 private:
     int depth, height, width, filterSize, stride, noOfFilters, padding = 0;

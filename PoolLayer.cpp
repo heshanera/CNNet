@@ -7,11 +7,13 @@
 
 #include "PoolLayer.hpp"
 
-PoolLayer::PoolLayer(int depth, int height, int width, int poolW, int poolH) {
+PoolLayer::PoolLayer() { }
 
-    this->depth = depth;
-    this->height = height;
-    this->width = width;
+PoolLayer::PoolLayer(std::tuple<int, int, int> dimensions, int poolW, int poolH) {
+
+    this->depth = std::get<0>(dimensions);
+    this->height = std::get<1>(dimensions);
+    this->width = std::get<2>(dimensions);
     this->poolW = poolW;
     this->poolH = poolH;
     this->outHeight = ((height - poolH)/poolH) + 1;
@@ -75,4 +77,8 @@ Eigen::MatrixXd * PoolLayer::pool(Eigen::MatrixXd * input) {
 //    }
 
     return output;
+}
+
+std::tuple<int, int, int> PoolLayer::getOutputDims() {
+    return std::make_tuple(depth, outHeight, outWidth);
 }
