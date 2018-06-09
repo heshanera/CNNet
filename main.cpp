@@ -35,15 +35,18 @@ int main(int argc, char** argv) {
     struct::FCLayStruct FCL1;
     FCL1.outputs = 5; // neurons in fully connected layer
     FCL1.classes = 4; // target classes
+    struct::FCLayStruct FCL2;
+    FCL2.outputs = 5; // neurons in fully connected layer
+    FCL2.classes = 4; // target classes
     
-    char layerOrder[] = {'C','P','C','P','F'};
+    char layerOrder[] = {'C','P','C','P','F','F'};
     struct::ConvLayStruct CLs[] = {CL1,CL2};
     struct::PoolLayStruct PLs[] = {PL1,PL2};
-    struct::FCLayStruct FCLs[] = {FCL1};
+    struct::FCLayStruct FCLs[] = {FCL1,FCL2};
     
     
     struct::NetStruct netStruct;
-    netStruct.layers = 5;
+    netStruct.layers = 6;
     netStruct.layerOrder = layerOrder;
     netStruct.CL = CLs;
     netStruct.PL = PLs;

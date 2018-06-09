@@ -68,6 +68,7 @@ CNN::CNN(std::tuple<int, int, int> dimensions, struct NetStruct netStruct) {
                     dimensions, 
                     netStruct.FCL[FCLpos].outputs
                 );
+                dimensions = netLayers.FCL[FCLpos].getOutputDims();
                 FCLpos++;
                 break;    
             }    
@@ -123,8 +124,9 @@ int CNN::forward(Eigen::MatrixXd * layerInput) {
             }
             case 'F':
             {    
-                std::cout<<"Forward Pass:  Connected Layer"<<FCLpos+1<<"...\n";
-                std::cout<<netLayers.FCL[FCLpos].forward(layerInput);
+                std::cout<<"Forward Pass: Fully Connected Layer"<<FCLpos+1<<"...\n";
+                layerInput = netLayers.FCL[FCLpos].forward(layerInput);
+                std::cout<<layerInput[0]<<"\n";
                 FCLpos++;
                 break;    
             }    

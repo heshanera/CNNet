@@ -45,12 +45,10 @@ int PoolLayer::initMat() {
 
 Eigen::MatrixXd * PoolLayer::pool(Eigen::MatrixXd * input) {
 
-    std::cout<<depth<<"\n";
     int outX, outY;
     std::ptrdiff_t a, b;
     for (int i = 0; i < depth; i++) {
         outX = 0;
-        std::cout<<"width: "<<width<<"   height: "<<height<<"\n\n";
         for (int x = 0; x < width; x+=poolW) {
             outY = 0;
             for (int y = 0; y < height; y+=poolH) {

@@ -42,12 +42,18 @@ public:
      * @param input: input matrix 
      * @return 
      */
-    Eigen::MatrixXd forward(Eigen::MatrixXd * input);
+    Eigen::MatrixXd * forward(Eigen::MatrixXd * input);
+    /**
+     * Return the dimension of the layer output
+     * 
+     * @return a tuple
+     */
+    std::tuple<int, int, int> getOutputDims();
 private:
     int depth, height, width, outputs;
     Eigen::MatrixXd ** weights;
     Eigen::MatrixXd bias;
-    Eigen::MatrixXd output;
+    Eigen::MatrixXd * output;
     
 };
 

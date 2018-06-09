@@ -22,7 +22,13 @@ FCLayer::FCLayer(const FCLayer& orig) { }
 FCLayer::~FCLayer() { }
 
 int FCLayer::initMat() {
-    output = Eigen::MatrixXd(outputs,1); 
+    
+    output = new Eigen::MatrixXd[1];
+    Eigen::MatrixXd outMat = Eigen::MatrixXd::Zero(outputs,1);
+    output[0] = outMat;
+
+    
+//    output = Eigen::MatrixXd(outputs,1); 
     bias = Eigen::MatrixXd::Random(outputs,1); 
     bias*0.1;
     
@@ -37,7 +43,7 @@ int FCLayer::initMat() {
     return 0;
 }
 
-Eigen::MatrixXd FCLayer::forward(Eigen::MatrixXd * input) {
+Eigen::MatrixXd * FCLayer::forward(Eigen::MatrixXd * input) {
 
     // reshaping the weight matrix
     Eigen::MatrixXd weightsVecMat(outputs,depth*height*width);
@@ -64,7 +70,7 @@ Eigen::MatrixXd FCLayer::forward(Eigen::MatrixXd * input) {
         inputArr<<inputTmpVec, inputV;
     }
     inputVecMat.col(0) = inputArr;
-    output = Activation::sigmoid((weightsVecMat*inputVecMat) + (bias));
+    output[0] = Activation::sigmoid((weightsVecMat*inputVecMat) + (bias));
     
 //    std::cout<<output<<"\n";
 //    for(int i = 0; i < outputs; i++) {
@@ -77,3 +83,6 @@ Eigen::MatrixXd FCLayer::forward(Eigen::MatrixXd * input) {
     return output;
 }
 
+std::tuple<int, int, int> FCLayer::getOutputDims() {
+    return std::make_tuple(1, outputs, 1);
+}
