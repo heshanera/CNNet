@@ -6,59 +6,59 @@
  */
 
 #include <iostream>
-#include "ConvolutionLayer.hpp"
-#include "PoolLayer.hpp"
-#include "FCLayer.hpp"
-
-using namespace std;
+#include <libiproc.h>
+#include "CNN.hpp"
 
 /*
  * 
  */
 int main(int argc, char** argv) {
-
-    ///////////////////////////////////////////////////////////////
     
-    int depth = 1;
-    int height = 20;
-    int width = 20; 
-    int filterSize = 5;
-    int stride = 1; //
-    int noOfFilters = 5;
-    int padding = 0; //
+   
+    std::tuple<int, int, int> dimensions = std::make_tuple(1,28,28);
     
-    ConvolutionLayer cl(depth, height, width, filterSize, stride, noOfFilters, padding);
+    struct::ConvLayStruct CL1;
+    CL1.filterSize = 5; // filter size: N x N
+    CL1.filters = 3; // No of filters
+    CL1.stride = 1;
     
-    Eigen::MatrixXd input[1];
-    Eigen::MatrixXd img = Eigen::MatrixXd::Ones(20,20);
-    input[0] = img;
+    struct::PoolLayStruct PL1;
+    PL1.poolH = 2; // pool size: N x N
+    PL1.poolW = 2;
     
-    cl.convolute(input);
-  
-    ///////////////////////////////////////////////////////////////
+    struct::FCLayStruct FCL1;
+    FCL1.outputs = 5; // neurons in fully connected layer
+    FCL1.classes = 4; // target classes
     
-    depth = noOfFilters;
-    int poolW = 2;
-    int poolH = 2;
-    Eigen::MatrixXd inputPl[depth];
-    for(int j = 0; j < depth; j++) {
-        Eigen::MatrixXd img = Eigen::MatrixXd::Ones(20,20);
-        inputPl[j] = img;
+    char layerOrder[] = {'C','P','F'};
+    struct::ConvLayStruct CLs[] = {CL1};
+    struct::PoolLayStruct PLs[] = {PL1};
+    struct::FCLayStruct FCLs[] = {FCL1};
+    
+    
+    struct::NetStruct netStruct;
+    netStruct.layers = 3;
+    netStruct.layerOrder = layerOrder;
+    netStruct.CL = CLs;
+    netStruct.PL = PLs;
+    netStruct.FCL = FCLs;
+    
+    Eigen::MatrixXd inImgArr[1];
+    Eigen::MatrixXd inImg(28,28);
+    
+    for(int i = 0; i < 28; i++){
+        for(int j = 10; j < 28; j++){
+            inImg(i,j) = 1;
+        }
     }
     
-    PoolLayer pl(depth, height, width, poolW, poolH);
-    Eigen::MatrixXd * inputFcl = pl.pool(inputPl);
+    inImgArr[0] = inImg;
     
-    ///////////////////////////////////////////////////////////////
+    CNN cn(dimensions, netStruct);
+    cn.train(inImgArr);
     
-    int outputs = 2;
-    height = inputFcl[0].rows();
-    width = inputFcl[0].cols();
     
-    FCLayer fcl(depth, height, width, outputs);
-    fcl.forward(inputFcl);
-    
-    ///////////////////////////////////////////////////////////////
+//    cn.tmp();
     
     
     return 0;
