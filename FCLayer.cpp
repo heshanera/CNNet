@@ -37,7 +37,7 @@ int FCLayer::initMat() {
     return 0;
 }
 
-Eigen::RowVectorXd FCLayer::forward(Eigen::MatrixXd * input) {
+Eigen::MatrixXd FCLayer::forward(Eigen::MatrixXd * input) {
 
     // reshaping the weight matrix
     Eigen::MatrixXd weightsVecMat(outputs,depth*height*width);
@@ -74,6 +74,6 @@ Eigen::RowVectorXd FCLayer::forward(Eigen::MatrixXd * input) {
 //        std::cout<<"\n------------------------ "<<i<<" ---------\n";
 //    }
     
-    return (Eigen::RowVectorXd::Ones(outputs));
+    return output;
 }
 

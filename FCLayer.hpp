@@ -42,7 +42,7 @@ public:
      * @param input: input matrix 
      * @return 
      */
-    Eigen::RowVectorXd forward(Eigen::MatrixXd * input);
+    Eigen::MatrixXd forward(Eigen::MatrixXd * input);
 private:
     int depth, height, width, outputs;
     Eigen::MatrixXd ** weights;

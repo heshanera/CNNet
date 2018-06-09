@@ -30,9 +30,9 @@ int ConvolutionLayer::initMat() {
     // generating filter weight matrix array
     // depth * filterSize * filterSize * noOfFilters
     
-    filters = new Eigen::MatrixXd * [noOfFilters];
-    for(int i = 0; i < noOfFilters; i++) {
-        filters[i] = new Eigen::MatrixXd[depth];
+    filters = new Eigen::MatrixXd * [depth];
+    for(int i = 0; i < depth; i++) {
+        filters[i] = new Eigen::MatrixXd[noOfFilters];
     }
     
     double max, min, diff;
@@ -41,8 +41,8 @@ int ConvolutionLayer::initMat() {
     diff = max - min;
     
     //srand(time(NULL));  // if not random numbers are generated in the same order
-    for (int i = 0; i < noOfFilters; i++) {
-        for (int j = 0; j < depth; j++) {
+    for (int i = 0; i < depth; i++) {
+        for (int j = 0; j < noOfFilters; j++) {
             Eigen::MatrixXd filter(filterSize,filterSize);
             for (int x = 0; x < filterSize; x++) {
                 for (int y = 0; y < filterSize; y++) {
@@ -62,8 +62,8 @@ int ConvolutionLayer::initMat() {
     this->outHeight = (int)((height - filterSize + 2*padding)/stride) + 1; // rows
     this->outWidth = (int)((width - filterSize + 2*padding)/stride) + 1; // columns
    
-    output = new Eigen::MatrixXd[noOfFilters];
-    for (int i = 0; i < noOfFilters; i++) {
+    output = new Eigen::MatrixXd[noOfFilters*depth];
+    for (int i = 0; i < noOfFilters*depth; i++) {
         Eigen::MatrixXd outVal = Eigen::MatrixXd::Zero(outHeight,outWidth);
         output[i] = outVal;
     }
@@ -72,18 +72,20 @@ int ConvolutionLayer::initMat() {
 
 
 Eigen::MatrixXd *  ConvolutionLayer::convolute(Eigen::MatrixXd * input) {
-    
-    for (int i = 0; i < noOfFilters; i++) {
-        Eigen::MatrixXd filter = filters[i /*filter*/][0 /*depth*/];
-        Eigen::Map<Eigen::RowVectorXd> filterV(filter.data(), filter.size());
-        
-        for (int x = 0; x < outWidth; x+=stride) {
-            for (int y = 0; y < outHeight; y+=stride) {
-                Eigen::MatrixXd inputBlock = input[0 /*depth*/].block(y,x,filterSize,filterSize);
-                Eigen::Map<Eigen::RowVectorXd> inputBlockV(inputBlock.data(), inputBlock.size());
-                output[i](y,x) = Activation::sigmoid(inputBlockV.dot(filterV) + bias[i]);    
+
+    for (int j = 0; j < depth; j++) {
+        for (int i = 0; i < noOfFilters; i++) {
+            Eigen::MatrixXd filter = filters[j /*depth*/][i /*filter*/];
+            Eigen::Map<Eigen::RowVectorXd> filterV(filter.data(), filter.size());
+
+            for (int x = 0; x < outWidth; x+=stride) {
+                for (int y = 0; y < outHeight; y+=stride) {
+                    Eigen::MatrixXd inputBlock = input[j /*depth*/].block(y,x,filterSize,filterSize);
+                    Eigen::Map<Eigen::RowVectorXd> inputBlockV(inputBlock.data(), inputBlock.size());                   
+                    output[(j*noOfFilters) + i](y,x) = (inputBlockV.dot(filterV) + bias[i]);         
+                }
             }
-        }
+        }    
     }
 
 //    for (int i = 0; i < noOfFilters; i++) {
@@ -95,5 +97,5 @@ Eigen::MatrixXd *  ConvolutionLayer::convolute(Eigen::MatrixXd * input) {
 }
 
 std::tuple<int, int, int> ConvolutionLayer::getOutputDims() {
-    return std::make_tuple(noOfFilters, outHeight, outWidth);
+    return std::make_tuple((noOfFilters*depth), outHeight, outWidth);
 }

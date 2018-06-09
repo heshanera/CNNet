@@ -6,7 +6,6 @@
  */
 
 #include "CNN.hpp"
-#include "IProc/IProc.h"
 
 CNN::CNN(std::tuple<int, int, int> dimensions, struct NetStruct netStruct) { 
     
@@ -32,8 +31,8 @@ CNN::CNN(std::tuple<int, int, int> dimensions, struct NetStruct netStruct) {
     netLayers.PL = new PoolLayer[netLayers.numPL];
     netLayers.FCL = new FCLayer[netLayers.numFCL];
     
+    CLpos = 0,PLpos = 0,FCLpos = 0;
     for (int i = 0; i < layers; i++) {
-        CLpos = 0,PLpos = 0,FCLpos = 0;
 
         switch (layerOrder[i]) {
             case 'C':
@@ -83,9 +82,8 @@ CNN::~CNN() { }
 
 int CNN::forward(Eigen::MatrixXd * layerInput) {
 
-    int CLpos,PLpos,FCLpos;
+    int CLpos = 0,PLpos = 0,FCLpos = 0;
     for (int i = 0; i < layers; i++) {
-        CLpos = 0,PLpos = 0,FCLpos = 0;
 
         switch (layerOrder[i]) {
             case 'C':
@@ -93,11 +91,15 @@ int CNN::forward(Eigen::MatrixXd * layerInput) {
                 std::cout<<"Forward Pass: Convolution Layer"<<CLpos+1<<"...\n";
                 layerInput = netLayers.CL[CLpos].convolute(layerInput);
                 /////////////////////////////////////////////////////////////
-                /**                
-                for (int i = 0; i < 3; i++) {
-                    writeImg(layerInput[i]);
-                }
-                **/ 
+                                
+                // Write convoluted images 
+                /*
+                std::tuple<int, int, int> dimensions = netLayers.CL[CLpos].getOutputDims();
+                for (int i = 0; i < std::get<0>(dimensions); i++) {
+                    std::cout<<layerInput[i]<<std::endl<<std::endl;
+                    //writeImg(layerInput[i]);
+                } 
+                */
                 /////////////////////////////////////////////////////////////
                 CLpos++;
                 break;
@@ -105,14 +107,24 @@ int CNN::forward(Eigen::MatrixXd * layerInput) {
             case 'P':
             {    
                 std::cout<<"Forward Pass: Pool Layer"<<PLpos+1<<"...\n";
-                
+                layerInput = netLayers.PL[PLpos].pool(layerInput);
+                /////////////////////////////////////////////////////////////
+                // Write pooled results
+                /*       
+                std::tuple<int, int, int> dimensions = netLayers.CL[CLpos].getOutputDims();
+                for (int i = 0; i < std::get<0>(dimensions); i++) {
+                    std::cout<<layerInput[i]<<std::endl<<std::endl;
+                    //writeImg(layerInput[i]);
+                } 
+                */
+                /////////////////////////////////////////////////////////////
                 PLpos++;
                 break;
             }
             case 'F':
             {    
                 std::cout<<"Forward Pass:  Connected Layer"<<FCLpos+1<<"...\n";
-                
+                std::cout<<netLayers.FCL[FCLpos].forward(layerInput);
                 FCLpos++;
                 break;    
             }    
