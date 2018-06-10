@@ -34,15 +34,47 @@ public:
     virtual ~CNN();
     
     int forward(Eigen::MatrixXd * input);
-    int backprop();
+    int backprop(Eigen::MatrixXd * input, Eigen::MatrixXd label);
+    int train(Eigen::MatrixXd ** inputs, Eigen::MatrixXd * labels);
     
-    int train(Eigen::MatrixXd * input);
+    /**
+     * Back propagation from final layer to previous layer
+     * 
+     * @param prevDelta
+     * @param prevActivOut
+     * @return tuple of deltaW and new previous delta value
+     */
+    std::tuple<Eigen::MatrixXd, Eigen::MatrixXd> backPropgateLayer(
+        Eigen::MatrixXd prevDelta, 
+        Eigen::MatrixXd * prevActivOut
+    );
+    /**
+     * 
+     * @param prevDelta
+     * @param prevWeight
+     * @param prevActivOut
+     * @param preOut
+     * @return 
+     */
+    std::tuple<Eigen::MatrixXd, Eigen::MatrixXd> backPropgateLayer(
+        Eigen::MatrixXd prevDelta, 
+        Eigen::MatrixXd ** prevWeight,
+        Eigen::MatrixXd * prevActivOut,
+        Eigen::MatrixXd * preOut
+    );
     
-    int tmp();
 private:
     int layers;
     char * layerOrder;
     struct::NetLayers netLayers;
+    Eigen::MatrixXd forwardOut;
+    // for back propagation 
+    Eigen::MatrixXd ** weights;
+    Eigen::MatrixXd * output;
+    Eigen::MatrixXd * activatedOut;
+    // 
+    int depth, outputs;
+    
 };
 
 struct ConvLayStruct {

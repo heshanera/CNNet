@@ -50,10 +50,13 @@ public:
      */
     std::tuple<int, int, int> getOutputDims();
 private:
-    int depth, height, width, outputs;
+public:
+    int height, width, depth,outputs;
     Eigen::MatrixXd ** weights;
     Eigen::MatrixXd bias;
-    Eigen::MatrixXd * output;
+    Eigen::MatrixXd * output; // outputs before activation
+    Eigen::MatrixXd * activatedOut;
+    
     
 };
 

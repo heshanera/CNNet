@@ -63,9 +63,11 @@ int ConvolutionLayer::initMat() {
     this->outWidth = (int)((width - filterSize + 2*padding)/stride) + 1; // columns
    
     output = new Eigen::MatrixXd[noOfFilters*depth];
+    activatedOut = new Eigen::MatrixXd[noOfFilters*depth];
     for (int i = 0; i < noOfFilters*depth; i++) {
         Eigen::MatrixXd outVal = Eigen::MatrixXd::Zero(outHeight,outWidth);
         output[i] = outVal;
+        activatedOut[i] = outVal;
     }
     return 0;
 }
@@ -82,7 +84,8 @@ Eigen::MatrixXd *  ConvolutionLayer::convolute(Eigen::MatrixXd * input) {
                 for (int y = 0; y < outHeight; y+=stride) {
                     Eigen::MatrixXd inputBlock = input[j /*depth*/].block(y,x,filterSize,filterSize);
                     Eigen::Map<Eigen::RowVectorXd> inputBlockV(inputBlock.data(), inputBlock.size());                   
-                    output[(j*noOfFilters) + i](y,x) = (inputBlockV.dot(filterV) + bias[i]);         
+                    output[(j*noOfFilters) + i](y,x) = (inputBlockV.dot(filterV) + bias[i]);   
+                    activatedOut[(j*noOfFilters) + i](y,x) = (inputBlockV.dot(filterV) + bias[i]);
                 }
             }
         }    
@@ -93,7 +96,7 @@ Eigen::MatrixXd *  ConvolutionLayer::convolute(Eigen::MatrixXd * input) {
 //        std::cout <<"---------------------------------\n";
 //    }    
     
-    return output;
+    return activatedOut;
 }
 
 std::tuple<int, int, int> ConvolutionLayer::getOutputDims() {

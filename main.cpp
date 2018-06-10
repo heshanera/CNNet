@@ -33,40 +33,42 @@ int main(int argc, char** argv) {
     PL2.poolW = 2;
     
     struct::FCLayStruct FCL1;
-    FCL1.outputs = 5; // neurons in fully connected layer
+    FCL1.outputs = 10; // neurons in fully connected layer
     FCL1.classes = 4; // target classes
     struct::FCLayStruct FCL2;
-    FCL2.outputs = 5; // neurons in fully connected layer
+    FCL2.outputs = 8; // neurons in fully connected layer
     FCL2.classes = 4; // target classes
+    struct::FCLayStruct FCL3;
+    FCL3.outputs = 5; // neurons in fully connected layer
+    FCL3.classes = 4; // target classes
     
-    char layerOrder[] = {'C','P','C','P','F','F'};
+    char layerOrder[] = {'C','P','C','P','F','F','F'};
     struct::ConvLayStruct CLs[] = {CL1,CL2};
     struct::PoolLayStruct PLs[] = {PL1,PL2};
-    struct::FCLayStruct FCLs[] = {FCL1,FCL2};
+    struct::FCLayStruct FCLs[] = {FCL1,FCL2,FCL3};
     
     
     struct::NetStruct netStruct;
-    netStruct.layers = 6;
+    netStruct.layers = 7;
     netStruct.layerOrder = layerOrder;
     netStruct.CL = CLs;
     netStruct.PL = PLs;
     netStruct.FCL = FCLs;
     
-    Eigen::MatrixXd inImgArr[1];
+    Eigen::MatrixXd ** inImgArr;
+    inImgArr = new Eigen::MatrixXd * [1]; 
+    inImgArr[0] = new Eigen::MatrixXd[1]; 
     Eigen::MatrixXd inImg = Eigen::MatrixXd::Random(28,28);
+    inImgArr[0][0] = inImg;
     
-//    std::cout<<inImg;
-    
-//    for(int i = 0; i < 28; i++){
-//        for(int j = 10; j < 28; j++){
-//            inImg(i,j) = 1;
-//        }
-//    }
-    
-    inImgArr[0] = inImg;
+    Eigen::MatrixXd * inLblArr;
+    inLblArr = new Eigen::MatrixXd[1];
+    Eigen::MatrixXd inLbl = Eigen::MatrixXd::Zero(5,1);
+    inLbl(2,0) = 1;
+    inLblArr[0] = inLbl;
     
     CNN cn(dimensions, netStruct);
-    cn.train(inImgArr);
+    cn.train(inImgArr,inLblArr);
     
     
 //    cn.tmp();

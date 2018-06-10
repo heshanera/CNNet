@@ -20,6 +20,7 @@ public:
     static double sigmoid(double);
     static Eigen::MatrixXd sigmoid(Eigen::MatrixXd);
     static double sigmoidDeriv(double);
+    static Eigen::MatrixXd sigmoidDeriv(Eigen::MatrixXd);
     
 private:
 

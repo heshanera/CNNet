@@ -59,6 +59,7 @@ private:
     double * bias;
     Eigen::MatrixXd ** filters;
     Eigen::MatrixXd * output;
+    Eigen::MatrixXd * activatedOut;
     
 };
 

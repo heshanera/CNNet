@@ -24,10 +24,12 @@ FCLayer::~FCLayer() { }
 int FCLayer::initMat() {
     
     output = new Eigen::MatrixXd[1];
+    activatedOut = new Eigen::MatrixXd[1];
+    
     Eigen::MatrixXd outMat = Eigen::MatrixXd::Zero(outputs,1);
     output[0] = outMat;
+    activatedOut[0] = outMat;
 
-    
 //    output = Eigen::MatrixXd(outputs,1); 
     bias = Eigen::MatrixXd::Random(outputs,1); 
     bias*0.1;
@@ -70,7 +72,8 @@ Eigen::MatrixXd * FCLayer::forward(Eigen::MatrixXd * input) {
         inputArr<<inputTmpVec, inputV;
     }
     inputVecMat.col(0) = inputArr;
-    output[0] = Activation::sigmoid((weightsVecMat*inputVecMat) + (bias));
+    output[0] = (weightsVecMat*inputVecMat) + bias;
+    activatedOut[0] = Activation::sigmoid(output[0]);
     
 //    std::cout<<output<<"\n";
 //    for(int i = 0; i < outputs; i++) {
@@ -80,7 +83,7 @@ Eigen::MatrixXd * FCLayer::forward(Eigen::MatrixXd * input) {
 //        std::cout<<"\n------------------------ "<<i<<" ---------\n";
 //    }
     
-    return output;
+    return activatedOut;
 }
 
 std::tuple<int, int, int> FCLayer::getOutputDims() {

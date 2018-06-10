@@ -31,4 +31,12 @@ double Activation::sigmoidDeriv(double x) {
     return sigmoid(x) * (1-sigmoid(x));
 }
     
+Eigen::MatrixXd Activation::sigmoidDeriv(Eigen::MatrixXd mat){
+    for(int x = 0; x < mat.cols(); x++){
+        for(int y = 0; y < mat.rows(); y++){
+            mat(y,x) = (sigmoid(mat(y,x)) * (1-mat(y,x)));
+        }
+    }
+    return mat;
+}
 

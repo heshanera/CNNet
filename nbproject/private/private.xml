@@ -8,14 +8,16 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/home/heshan/Projects/NetBeansProjects/CNNet/PoolLayer.hpp</file>
+            <file>file:/home/heshan/Projects/NetBeansProjects/CNNet/CNN.cpp</file>
             <file>file:/home/heshan/Projects/NetBeansProjects/CNNet/FCLayer.cpp</file>
-            <file>file:/home/heshan/Projects/NetBeansProjects/CNNet/Activation.cpp</file>
             <file>file:/home/heshan/Projects/NetBeansProjects/CNNet/FCLayer.hpp</file>
             <file>file:/home/heshan/Projects/NetBeansProjects/CNNet/ConvolutionLayer.hpp</file>
             <file>file:/home/heshan/Projects/NetBeansProjects/CNNet/PoolLayer.cpp</file>
+            <file>file:/home/heshan/Projects/NetBeansProjects/CNNet/CNN.hpp</file>
             <file>file:/home/heshan/Projects/NetBeansProjects/CNNet/main.cpp</file>
+            <file>file:/home/heshan/Projects/NetBeansProjects/CNNet/ClassificationLayer.cpp</file>
             <file>file:/home/heshan/Projects/NetBeansProjects/CNNet/ConvolutionLayer.cpp</file>
-            <file>file:/home/heshan/Projects/NetBeansProjects/CNNet/Activation.hpp</file>
+            <file>file:/home/heshan/Projects/NetBeansProjects/CNNet/ClassificationLayer.hpp</file>
         </group>
     </open-files>
 </project-private>
