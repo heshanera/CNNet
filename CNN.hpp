@@ -38,10 +38,10 @@ public:
     int train(Eigen::MatrixXd ** inputs, Eigen::MatrixXd * labels);
     
     /**
-     * Back propagation from final layer to previous layer
+     * Back propagation from final layer to previous fully connected layer
      * 
-     * @param prevDelta
-     * @param prevActivOut
+     * @param prevDelta: previous delta values 
+     * @param prevActivOut: previous layer activations
      * @return tuple of deltaW and new previous delta value
      */
     std::tuple<Eigen::MatrixXd, Eigen::MatrixXd> backPropgateLayer(
@@ -49,12 +49,13 @@ public:
         Eigen::MatrixXd * prevActivOut
     );
     /**
+     * Back propagation from fully connected layer to fully connected layer
      * 
-     * @param prevDelta
-     * @param prevWeight
-     * @param prevActivOut
+     * @param prevDelta: previous delta values 
+     * @param prevWeight: previous layer weights
+     * @param prevActivOut: previous layer activations
      * @param preOut
-     * @return 
+     * @return tuple of deltaW and new delta value
      */
     std::tuple<Eigen::MatrixXd, Eigen::MatrixXd> backPropgateLayer(
         Eigen::MatrixXd prevDelta, 
@@ -62,6 +63,42 @@ public:
         Eigen::MatrixXd * prevActivOut,
         Eigen::MatrixXd * preOut
     );
+    /**
+     * Back propagation from fully connected layer to the pooling layer
+     * 
+     * @param prevDelta: previous delta values 
+     * @param prevWeight: previous layer weights
+     * @param prevActivOut: previous layer activations
+     * @param preOut
+     * @return 
+     */
+    Eigen::MatrixXd backPropgateToPool(
+        Eigen::MatrixXd prevDelta, 
+        Eigen::MatrixXd ** prevWeight,
+        Eigen::MatrixXd * prevActivOut,
+        Eigen::MatrixXd * preOut
+    );
+    /**
+     * Back propagate from pool layer to the convolutional layer
+     * 
+     * @param prevDelta: previous delta values 
+     * @param prevWeight: previous layer weights
+     * @param prevActivOut: previous layer activations
+     * @param maxIndices: indices of the max positions
+     * @param poolH: pool window width
+     * @param poolW: pool window width
+     * @param output
+     * @return 
+     */
+    Eigen::MatrixXd backPropgateToConv(
+        Eigen::MatrixXd prevDelta, 
+        Eigen::MatrixXd ** prevWeight,
+        Eigen::MatrixXd * prevActivOut,
+        Eigen::MatrixXd ** maxIndices,
+        int poolH, int poolW,
+        Eigen::MatrixXd * output
+    );
+    
     
 private:
     int layers;
@@ -72,9 +109,11 @@ private:
     Eigen::MatrixXd ** weights;
     Eigen::MatrixXd * output;
     Eigen::MatrixXd * activatedOut;
-    // 
+    // back propagation in fully connected layers
     int depth, outputs;
-    
+    // back propagation in pooling layers
+    int poolDepth, outHeight, outWidth;
+    Eigen::MatrixXd * poolDeltaW;
 };
 
 struct ConvLayStruct {
