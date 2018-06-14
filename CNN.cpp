@@ -89,7 +89,7 @@ int CNN::forward(Eigen::MatrixXd * layerInput) {
         switch (layerOrder[i]) {
             case 'C':
             {    
-                std::cout<<"Forward Pass: Convolution Layer"<<CLpos+1<<"...\n";
+//                std::cout<<"Forward Pass: Convolution Layer"<<CLpos+1<<"...\n";
                 layerInput = netLayers.CL[CLpos].convolute(layerInput);
                 /////////////////////////////////////////////////////////////
                                 
@@ -107,7 +107,7 @@ int CNN::forward(Eigen::MatrixXd * layerInput) {
             }
             case 'P':
             {    
-                std::cout<<"Forward Pass: Pool Layer"<<PLpos+1<<"...\n";
+//                std::cout<<"Forward Pass: Pool Layer"<<PLpos+1<<"...\n";
                 layerInput = netLayers.PL[PLpos].pool(layerInput);
                 /////////////////////////////////////////////////////////////
                 // Write pooled results
@@ -124,9 +124,12 @@ int CNN::forward(Eigen::MatrixXd * layerInput) {
             }
             case 'F':
             {    
-                std::cout<<"Forward Pass: Fully Connected Layer"<<FCLpos+1<<"...\n";
+//                std::cout<<"Forward Pass: Fully Connected Layer"<<FCLpos+1<<"...\n";
                 layerInput = netLayers.FCL[FCLpos].forward(layerInput);
                 FCLpos++;
+                if (FCLpos == netLayers.numFCL) {
+                    classPredicts = layerInput[0];
+                }
                 break;    
             }    
         }
@@ -137,8 +140,6 @@ int CNN::forward(Eigen::MatrixXd * layerInput) {
 
 int CNN::backprop(Eigen::MatrixXd * input, Eigen::MatrixXd label) {
 
-    double learningRate = 0.1;
-    
     Eigen::MatrixXd outDeriv = netLayers.FCL[netLayers.numFCL-1].output[0];
     outDeriv = Activation::sigmoidDeriv(outDeriv);
     Eigen::MatrixXd delta = (forwardOut-label).array() * outDeriv.array();
@@ -163,8 +164,7 @@ int CNN::backprop(Eigen::MatrixXd * input, Eigen::MatrixXd label) {
         // Previous layer
         if (layer-1 < 0) { 
             activatedOut = input;
-//            poolDepth = -1;
-            std::cout<<"POOL DEPTH: TODO";
+            poolDepth = 1;
         }    
         else {
             switch (layerOrder[layer-1]) {
@@ -199,12 +199,13 @@ int CNN::backprop(Eigen::MatrixXd * input, Eigen::MatrixXd label) {
         switch (layerOrder[layer]) {
             case 'C':
             {    
-                std::cout<<"Backward Pass from Convolution Layer"<<CLpos+1<<"...\n";
+//                std::cout<<"Backward Pass from Convolution Layer"<<CLpos+1<<"...\n";
                 
                 int stride = netLayers.CL[CLpos].stride;
                 int noOfFilters = netLayers.CL[CLpos].noOfFilters;
+                int filterSize = netLayers.CL[CLpos].filterSize;
 //                Eigen::MatrixXd biasDelta;
-                delta = backPropgateToFilters(weights,stride,activatedOut);
+                delta = backPropgateToFilters(weights,stride,filterSize,activatedOut);
                 
                 outputs = poolDepth;
                 depth = noOfFilters;
@@ -223,7 +224,7 @@ int CNN::backprop(Eigen::MatrixXd * input, Eigen::MatrixXd label) {
             }
             case 'P':
             {    
-                std::cout<<"Backward Pass from Pool Layer"<<PLpos+1<<"...\n";
+//                std::cout<<"Backward Pass from Pool Layer"<<PLpos+1<<"...\n";
                 
                 outHeightC = netLayers.PL[PLpos].outHeight;
                 outWidthC = netLayers.PL[PLpos].outWidth;
@@ -242,10 +243,13 @@ int CNN::backprop(Eigen::MatrixXd * input, Eigen::MatrixXd label) {
             }
             case 'F':
             {
-                std::cout<<"Backward Pass from Fully Connected Layer"<<FCLpos+1<<"...\n";
+//                std::cout<<"Backward Pass from Fully Connected Layer"<<FCLpos+1<<"...\n";
                 if ( layerOrder[layer-1] == 'F' ) {
                     Eigen::MatrixXd deltaW;
                     if ( layer == (layers-1)) {
+                        // error values in each iteration
+                        std::cout<<(delta.sum() / delta.size())<<"\n";
+                        ///////////////////////////////////////////////////////////
                         res = backPropgateLayer(delta, activatedOut);
                         deltaW = std::get<0>(res);
                         delta = std::get<1>(res);
@@ -492,12 +496,12 @@ int CNN::backPropgateToConv(
 
 Eigen::MatrixXd CNN::backPropgateToFilters(
         Eigen::MatrixXd ** prevWeight, 
-        int stride, 
+        int stride, int filterSize,
         Eigen::MatrixXd * prevActivOut
 ) {
     
     int totalDeltas = delta2[0].rows() * delta2[0].cols();
-    int filterSize = prevWeight[0][0].rows();
+//    int filterSize = prevWeight[0][0].rows();
     
     Eigen::MatrixXd biasDelta = Eigen::MatrixXd::Zero(poolDepth, 1);
     filterDelta = new Eigen::MatrixXd[poolDepth];
@@ -507,18 +511,18 @@ Eigen::MatrixXd CNN::backPropgateToFilters(
     
     // reshaping the delta values matrix array
     Eigen::MatrixXd reshapedDelta = Eigen::MatrixXd::Zero(poolDepth,totalDeltas);
+    
     for (int i = 0; i < poolDepth; i++) {
         Eigen::Map<Eigen::RowVectorXd> deltaRowV(delta2[i].data(), delta2[i].size());
         reshapedDelta.row(i) = deltaRowV;
-    }
-    std::cout<<"\n\n####################################################\n\n";
+    } 
+    
     int row, slide;
     Eigen::MatrixXd inMat;
     for (int i = 0; i < poolDepth; i++) {
         row = 0; slide = 0;
         for (int j = 0; j < totalDeltas; j++) {
             inMat = prevActivOut[i].block(row,slide,filterSize,filterSize);
-            
             filterDelta[i] += (inMat*reshapedDelta(i,j));
                    
             slide += stride;
@@ -533,16 +537,31 @@ Eigen::MatrixXd CNN::backPropgateToFilters(
     return biasDelta;
 }
 
-
-int CNN::train(Eigen::MatrixXd ** inputs, Eigen::MatrixXd * labels) {
-    int noOfInputs = 1;
-    int iterations = 1;
-    for (int i = 0; i < noOfInputs; i++) {
+int CNN::train(
+    Eigen::MatrixXd ** inputs, 
+    Eigen::MatrixXd * labels,
+    int inputSize, 
+    int iterations, 
+    double learningRate
+) {
+    bpError = Eigen::VectorXd(0);
+    this->learningRate = learningRate;
+    for (int i = 0; i < inputSize; i++) {
         for (int j = 0; j < iterations; j++) {
             forward(inputs[i]);
             backprop(inputs[i],labels[i]);
         }    
     }
-    
+    std::cout<<bpError<<"\n";
     return 0;
 }
+
+Eigen::MatrixXd CNN::predict(Eigen::MatrixXd * input) {
+    forward(input);
+    for (int i = 0; i < classPredicts.rows(); i++) {
+        if (classPredicts(i,0) > 0.5 ) classPredicts(i,0) = 1;
+        else classPredicts(i,0) = 0;
+    }
+    return classPredicts;
+}
+

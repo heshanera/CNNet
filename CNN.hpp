@@ -33,9 +33,46 @@ public:
     CNN(const CNN& orig);
     virtual ~CNN();
     
+    /**
+     * forward propagation through the network
+     * 
+     * @param input: input matrix
+     * @return 
+     */
     int forward(Eigen::MatrixXd * input);
+    /**
+     * Back propagate the error  
+     * 
+     * @param input: input matrix
+     * @param label: label for the given matrix
+     * @return 
+     */
     int backprop(Eigen::MatrixXd * input, Eigen::MatrixXd label);
-    int train(Eigen::MatrixXd ** inputs, Eigen::MatrixXd * labels);
+    /**
+     * Train the network
+     * 
+     * @param inputs: input images [matrices]
+     * @param labels: labels of the inputs
+     * @param inputSize: number of inputs
+     * @param iterations: training iteration per input matrix
+     * @param learningRate
+     * @return 
+     */
+    int train(
+        Eigen::MatrixXd ** inputs, 
+        Eigen::MatrixXd * labels,
+        int inputSize,
+        int iterations,
+        double learningRate
+    );
+    
+    /**
+     * predict the input class
+     * 
+     * @param input: Image or matrix
+     * @return a matrix of output classes
+     */
+    Eigen::MatrixXd predict(Eigen::MatrixXd * input);
     
     /**
      * Back propagation from final layer to previous fully connected layer
@@ -102,19 +139,20 @@ public:
     /**
      * Back propagate to the filters in the convolutional layer
      * 
-     * @param prevWeight
+     * @param prevWeight: previous layer weights
      * @param stride
-     * @param prevActivOut
+     * @param prevActivOut: previous layer activations
      * @param output
-     * @return 
+     * @return matrix of the the delta values
      */
     Eigen::MatrixXd backPropgateToFilters(
         Eigen::MatrixXd ** prevWeight, 
-        int stride, 
+        int stride, int filterSize,
         Eigen::MatrixXd * prevActivOut
     );
     
 private:
+    double learningRate;
     int layers;
     char * layerOrder;
     struct::NetLayers netLayers;
@@ -132,6 +170,9 @@ private:
     int convDepth, outHeightC, outWidthC;
     Eigen::MatrixXd * delta2;
     Eigen::MatrixXd * filterDelta;
+    // predictions
+    Eigen::MatrixXd classPredicts;
+    Eigen::VectorXd bpError;
     
 };
 

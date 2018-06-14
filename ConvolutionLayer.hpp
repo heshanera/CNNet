@@ -54,11 +54,11 @@ public:
     std::tuple<int, int, int> getOutputDims();
     
 private:
-    int height, width, filterSize, padding = 0;
+    int height, width, padding = 0;
     double * bias;
     
 public:
-    int stride;
+    int stride, filterSize;
     int depth, noOfFilters;
     int outHeight, outWidth;
     Eigen::MatrixXd ** filters;

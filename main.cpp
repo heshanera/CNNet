@@ -67,8 +67,17 @@ int main(int argc, char** argv) {
     inLbl(2,0) = 1;
     inLblArr[0] = inLbl;
     
+    int iterations = 20;
+    int inputSize = 1;
+    double learningRate = 0.1;
+    
     CNN cn(dimensions, netStruct);
-    cn.train(inImgArr,inLblArr);
+    cn.train(inImgArr, inLblArr, inputSize, iterations, learningRate);
+    
+    Eigen::MatrixXd tstImgArr[1];
+    tstImgArr[0] = Eigen::MatrixXd::Random(28,28);
+    
+    std::cout<<cn.predict(tstImgArr)<<"\n";
     
     
 //    cn.tmp();
