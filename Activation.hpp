@@ -21,6 +21,7 @@ public:
     static Eigen::MatrixXd sigmoid(Eigen::MatrixXd);
     static double sigmoidDeriv(double);
     static Eigen::MatrixXd sigmoidDeriv(Eigen::MatrixXd);
+    static Eigen::MatrixXd maxPoolDelta(double, double, Eigen::MatrixXd, int ,int);
     
 private:
 

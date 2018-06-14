@@ -161,14 +161,22 @@ int CNN::backprop(Eigen::MatrixXd * input, Eigen::MatrixXd label) {
     for (layer; layer >= 0; layer--) {
         
         // Previous layer
-        if (layer-1 < 0) activatedOut = input;
+        if (layer-1 < 0) { 
+            activatedOut = input;
+//            poolDepth = -1;
+            std::cout<<"POOL DEPTH: TODO";
+        }    
         else {
             switch (layerOrder[layer-1]) {
                 case 'C':
                 {    
-//                    activatedOut = netLayers.CL[CLpos2].activatedOut;
-//                    CLpos2--;
-//                    break;
+                    activatedOut = netLayers.CL[CLpos2].activatedOut;
+                    convDepth = netLayers.CL[CLpos2].depth;
+                    outHeight = netLayers.CL[CLpos2].outHeight;
+                    outWidth = netLayers.CL[CLpos2].outWidth;
+                    
+                    CLpos2--;
+                    break;
                 }
                 case 'P':
                 {    
@@ -192,12 +200,43 @@ int CNN::backprop(Eigen::MatrixXd * input, Eigen::MatrixXd label) {
             case 'C':
             {    
                 std::cout<<"Backward Pass from Convolution Layer"<<CLpos+1<<"...\n";
+                
+                int stride = netLayers.CL[CLpos].stride;
+                int noOfFilters = netLayers.CL[CLpos].noOfFilters;
+//                Eigen::MatrixXd biasDelta;
+                delta = backPropgateToFilters(weights,stride,activatedOut);
+                
+                outputs = poolDepth;
+                depth = noOfFilters;
+                weights = new Eigen::MatrixXd * [poolDepth];
+//                delta = Eigen::MatrixXd(poolDepth,1);
+                for (int i = 0; i < poolDepth; i++) {
+                    weights[i] = new Eigen::MatrixXd[noOfFilters];
+                    for (int j = 0; j < noOfFilters; j++) {
+                        weights[i][j] = netLayers.CL[CLpos].filters[i][j];
+                        netLayers.CL[CLpos].filters[i][j] += (filterDelta[i]*learningRate);
+                    }    
+                }
+                
                 CLpos--;
                 break;
             }
             case 'P':
             {    
                 std::cout<<"Backward Pass from Pool Layer"<<PLpos+1<<"...\n";
+                
+                outHeightC = netLayers.PL[PLpos].outHeight;
+                outWidthC = netLayers.PL[PLpos].outWidth;
+                poolDepth = netLayers.PL[PLpos].depth;
+                int poolH = netLayers.PL[PLpos].poolH;
+                int poolW = netLayers.PL[PLpos].poolW;
+                output = netLayers.PL[PLpos].output;
+                Eigen::MatrixXd ** maxIndices = netLayers.PL[PLpos].maxIndices;
+                // delta values are stored in variable: delta2
+                backPropgateToConv(delta, weights, activatedOut, 
+                        maxIndices, poolH, poolW, output);
+                
+//                if ( PLpos == 0 ) {std::exit(0); }
                 PLpos--;
                 break;
             }
@@ -340,11 +379,169 @@ Eigen::MatrixXd CNN::backPropgateToPool(
     return prevDelta;
 }
 
+int CNN::backPropgateToConv(
+        Eigen::MatrixXd prevDelta, 
+        Eigen::MatrixXd ** prevWeight, 
+        Eigen::MatrixXd * prevActivOut, 
+        Eigen::MatrixXd ** maxIndices, 
+        int poolH, int poolW, 
+        Eigen::MatrixXd * output
+) {
+
+    // shape of the pool output (outer layer - pool): poolDepth, outHeightC, outWidthC
+    // previous weight (prevWeight) shape: outputs, depth, outHeight, outWidth
+    
+    Eigen::MatrixXd activePoolOut[poolDepth];
+    for (int i = 0; i < poolDepth; i++) {
+        activePoolOut[i] = Activation::sigmoidDeriv(output[i]);  
+    }
+    
+    int WMatSize = outHeightC*outWidthC; 
+    int scale = (WMatSize/prevWeight[0][0].size());
+    if (prevWeight[0][0].size() != WMatSize) {    
+        Eigen::MatrixXd ** tmpPrevWeight;
+        tmpPrevWeight = new Eigen::MatrixXd * [outputs];
+        for (int i = 0; i < outputs; i++) {
+            tmpPrevWeight[i] = new Eigen::MatrixXd[depth];
+            for (int j = 0; j < depth; j++) {
+                tmpPrevWeight[i][j] = Eigen::MatrixXd::Zero(outHeightC,outWidthC);
+                for(int a = 0; a < outHeightC; a+=prevWeight[0][0].rows()) {
+                    for(int b = 0; b < outWidthC; b+=prevWeight[0][0].cols()) {
+                        tmpPrevWeight[i][j].block(a,b,
+                                prevWeight[0][0].rows(),
+                                prevWeight[0][0].cols()
+                        ) = prevWeight[i][j]/scale;
+                    }
+                }
+            }
+        }
+        prevWeight = tmpPrevWeight;
+    }
+    
+    
+    Eigen::MatrixXd tmpDelta = Eigen::MatrixXd::Zero(poolDepth,(outHeightC*outWidthC));
+//    std::cout<<"cols: "<<outHeightC*outWidthC<<"\n";
+//    std::cout<<"previous w size: "<<prevWeight[0][0].size()<<"\n";
+//    std::cout<<"outputs: "<<outputs<<"\n";
+//    std::cout<<"depth: "<<depth<<"\n";
+    for (int i = 0; i < outputs; i++) {
+        for (int j = 0; j < depth; j++) {
+            Eigen::Map<Eigen::RowVectorXd> deltaRowV(prevWeight[i][j].data(), prevWeight[i][j].size());
+            deltaRowV = deltaRowV*prevDelta(i,0);
+            tmpDelta.row(j).array() += deltaRowV.array();
+        }
+    }
+    
+    for (int i = 0; i < depth; i++) {
+        Eigen::Map<Eigen::RowVectorXd> activePoolOutRowV(activePoolOut[i].data(), activePoolOut[i].size());
+        tmpDelta.row(i) = tmpDelta.row(i).array() * activePoolOutRowV.array();
+    }
+    
+    // reshaping the pool output
+    Eigen::MatrixXd reshapedPoolOut(poolDepth, (outHeightC*outWidthC));
+    for (int i = 0; i < poolDepth; i++) {
+        Eigen::Map<Eigen::RowVectorXd> outputRowV(output[i].data(), output[i].size());
+        reshapedPoolOut.row(i) = outputRowV;
+    }
+    
+//    Eigen::MatrixXd newDelta[convDepth];
+    delta2 = new Eigen::MatrixXd[convDepth];
+    for (int i = 0; i < convDepth; i++) {
+        delta2[i] = Eigen::MatrixXd::Zero(outHeight, outWidth);
+    }
+    
+    // reshaping the maxIndices
+    Eigen::MatrixXd reshapedMaxInd[poolDepth];
+    for (int  i = 0; i < poolDepth; i++) {
+        reshapedMaxInd[i] = Eigen::MatrixXd::Zero((outHeightC*outWidthC),2);
+        for (int j = 0; j < outWidthC; j++) {
+            for (int a = 0; a < outHeightC; a++) {
+                reshapedMaxInd[i].row((j*outHeightC)+a) = maxIndices[i][j].row(a);   
+            }
+        }
+    }
+    
+    Eigen::MatrixXd poolBlock;
+    int row, slide;
+    for (int i = 0; i < convDepth; i++) {
+        row = 0; slide = 0;
+        for (int j = 0; j < outWidthC; j++) {
+            
+            poolBlock = prevActivOut[i].block(row,slide,poolH,poolH);
+            poolBlock = Activation::maxPoolDelta(reshapedPoolOut(i,j),tmpDelta(i,j),poolBlock,poolH,poolW);
+            delta2[i].block(row, slide, poolH, poolH) = poolBlock;
+
+            slide += poolW;
+            if (slide >= outWidth) {
+                slide = 0;
+                row += poolH;
+            }
+        }
+    }
+//    std::cout<<newDelta[2]<<"\n\n";
+//    std::cout<<"pool Depth: "<<poolDepth<<"\n";
+//    std::cout<<"pool out height: "<<outHeightC<<"\n";
+//    std::cout<<"pool out width: "<<outWidthC<<"\n";
+//    
+//    std::cout<<"Outputs: "<<outputs<<"\n";
+//    std::cout<<"depth: "<<depth<<"\n";
+    
+//    delta2 = newDelta;
+    return 0;
+}
+
+Eigen::MatrixXd CNN::backPropgateToFilters(
+        Eigen::MatrixXd ** prevWeight, 
+        int stride, 
+        Eigen::MatrixXd * prevActivOut
+) {
+    
+    int totalDeltas = delta2[0].rows() * delta2[0].cols();
+    int filterSize = prevWeight[0][0].rows();
+    
+    Eigen::MatrixXd biasDelta = Eigen::MatrixXd::Zero(poolDepth, 1);
+    filterDelta = new Eigen::MatrixXd[poolDepth];
+    for(int i = 0; i < poolDepth; i++) {
+        filterDelta[i] = Eigen::MatrixXd::Zero(filterSize,filterSize);
+    }
+    
+    // reshaping the delta values matrix array
+    Eigen::MatrixXd reshapedDelta = Eigen::MatrixXd::Zero(poolDepth,totalDeltas);
+    for (int i = 0; i < poolDepth; i++) {
+        Eigen::Map<Eigen::RowVectorXd> deltaRowV(delta2[i].data(), delta2[i].size());
+        reshapedDelta.row(i) = deltaRowV;
+    }
+    std::cout<<"\n\n####################################################\n\n";
+    int row, slide;
+    Eigen::MatrixXd inMat;
+    for (int i = 0; i < poolDepth; i++) {
+        row = 0; slide = 0;
+        for (int j = 0; j < totalDeltas; j++) {
+            inMat = prevActivOut[i].block(row,slide,filterSize,filterSize);
+            
+            filterDelta[i] += (inMat*reshapedDelta(i,j));
+                   
+            slide += stride;
+            if ((slide + filterSize - stride) >= prevActivOut[0].cols()) {
+                slide = 0;
+                row+=stride;
+            }
+        }
+        biasDelta(i,0) += delta2[i].sum();
+    }
+    
+    return biasDelta;
+}
+
+
 int CNN::train(Eigen::MatrixXd ** inputs, Eigen::MatrixXd * labels) {
     int noOfInputs = 1;
+    int iterations = 1;
     for (int i = 0; i < noOfInputs; i++) {
-        forward(inputs[i]);
-        backprop(inputs[i],labels[i]);
+        for (int j = 0; j < iterations; j++) {
+            forward(inputs[i]);
+            backprop(inputs[i],labels[i]);
+        }    
     }
     
     return 0;

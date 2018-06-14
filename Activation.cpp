@@ -40,3 +40,21 @@ Eigen::MatrixXd Activation::sigmoidDeriv(Eigen::MatrixXd mat){
     return mat;
 }
 
+Eigen::MatrixXd Activation::maxPoolDelta(
+    double poolOutVal, 
+    double deltaVal, 
+    Eigen::MatrixXd poolBlock,
+    int poolDim1,
+    int poolDim2
+) {
+    
+    for (int i = 0; i < poolDim1; i++) {
+        for (int j = 0; j < poolDim2; j++) {
+            if ( poolBlock(i,j) < poolOutVal ) poolBlock(i,j) = 0;
+            else poolBlock(i,j) = deltaVal;
+        }
+    }
+    
+    return poolBlock;
+}
+

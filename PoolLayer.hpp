@@ -50,10 +50,11 @@ public:
      */
     std::tuple<int, int, int> getOutputDims();
 private:
-    int height, width, poolW, poolH;
-    Eigen::MatrixXd ** maxIndices;
+    
 public:
-    int depth, outHeight, outWidth;
+    int height, width;
+    int depth, outHeight, outWidth, poolW, poolH;
+    Eigen::MatrixXd ** maxIndices;
     Eigen::MatrixXd * output;
     
 

@@ -90,7 +90,7 @@ public:
      * @param output
      * @return 
      */
-    Eigen::MatrixXd backPropgateToConv(
+    int backPropgateToConv(
         Eigen::MatrixXd prevDelta, 
         Eigen::MatrixXd ** prevWeight,
         Eigen::MatrixXd * prevActivOut,
@@ -99,6 +99,20 @@ public:
         Eigen::MatrixXd * output
     );
     
+    /**
+     * Back propagate to the filters in the convolutional layer
+     * 
+     * @param prevWeight
+     * @param stride
+     * @param prevActivOut
+     * @param output
+     * @return 
+     */
+    Eigen::MatrixXd backPropgateToFilters(
+        Eigen::MatrixXd ** prevWeight, 
+        int stride, 
+        Eigen::MatrixXd * prevActivOut
+    );
     
 private:
     int layers;
@@ -111,9 +125,14 @@ private:
     Eigen::MatrixXd * activatedOut;
     // back propagation in fully connected layers
     int depth, outputs;
-    // back propagation in pooling layers
+    // back propagation to pooling layers
     int poolDepth, outHeight, outWidth;
     Eigen::MatrixXd * poolDeltaW;
+    // back propagation to convolution layers
+    int convDepth, outHeightC, outWidthC;
+    Eigen::MatrixXd * delta2;
+    Eigen::MatrixXd * filterDelta;
+    
 };
 
 struct ConvLayStruct {
