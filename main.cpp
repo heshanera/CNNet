@@ -14,7 +14,10 @@
 int main(int argc, char** argv) {
     
    
-    std::tuple<int, int, int> dimensions = std::make_tuple(1,28,28);
+    int width = 20;
+    int height = 20;
+    
+    std::tuple<int, int, int> dimensions = std::make_tuple(1,height,width);
     
     struct::ConvLayStruct CL1;
     CL1.filterSize = 5; // filter size: N x N
@@ -58,7 +61,7 @@ int main(int argc, char** argv) {
     Eigen::MatrixXd ** inImgArr;
     inImgArr = new Eigen::MatrixXd * [1]; 
     inImgArr[0] = new Eigen::MatrixXd[1]; 
-    Eigen::MatrixXd inImg = Eigen::MatrixXd::Random(28,28);
+    Eigen::MatrixXd inImg = Eigen::MatrixXd::Random(height,width);
     inImgArr[0][0] = inImg;
     
     Eigen::MatrixXd * inLblArr;
@@ -69,18 +72,15 @@ int main(int argc, char** argv) {
     
     int iterations = 20;
     int inputSize = 1;
-    double learningRate = 0.1;
+    double learningRate = 0.00001;
     
     CNN cn(dimensions, netStruct);
     cn.train(inImgArr, inLblArr, inputSize, iterations, learningRate);
     
     Eigen::MatrixXd tstImgArr[1];
-    tstImgArr[0] = Eigen::MatrixXd::Random(28,28);
+    tstImgArr[0] = Eigen::MatrixXd::Random(height,width);
     
     std::cout<<cn.predict(tstImgArr)<<"\n";
-    
-    
-//    cn.tmp();
     
     
     return 0;

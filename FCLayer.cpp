@@ -32,14 +32,14 @@ int FCLayer::initMat() {
 
 //    output = Eigen::MatrixXd(outputs,1); 
     bias = Eigen::MatrixXd::Random(outputs,1); 
-    bias*0.1;
+    bias*0.01;
     
     weights = new Eigen::MatrixXd * [outputs];
     for(int i = 0; i < outputs; i++) {
         weights[i] = new Eigen::MatrixXd[depth];
         for(int j = 0; j < depth; j++) {
             weights[i][j] = Eigen::MatrixXd::Random(height,width);
-            weights[i][j]*0.1;
+            weights[i][j]*0.01;
         }
     }
     return 0;

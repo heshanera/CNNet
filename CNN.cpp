@@ -408,6 +408,8 @@ int CNN::backPropgateToConv(
     
     int WMatSize = outHeightC*outWidthC; 
     int scale = (WMatSize/prevWeight[0][0].size());
+    int r = prevWeight[0][0].rows();
+    int c = prevWeight[0][0].cols();
     if (prevWeight[0][0].size() != WMatSize) {    
         Eigen::MatrixXd ** tmpPrevWeight;
         tmpPrevWeight = new Eigen::MatrixXd * [outputs];
@@ -415,19 +417,23 @@ int CNN::backPropgateToConv(
             tmpPrevWeight[i] = new Eigen::MatrixXd[depth];
             for (int j = 0; j < depth; j++) {
                 tmpPrevWeight[i][j] = Eigen::MatrixXd::Zero(outHeightC,outWidthC);
-                for(int a = 0; a < outHeightC; a+=prevWeight[0][0].rows()) {
-                    for(int b = 0; b < outWidthC; b+=prevWeight[0][0].cols()) {
-                        tmpPrevWeight[i][j].block(a,b,
-                                prevWeight[0][0].rows(),
-                                prevWeight[0][0].cols()
-                        ) = prevWeight[i][j]/scale;
-                    }
+                r = prevWeight[0][0].rows();
+                for(int a = 0; a < outHeightC; a+=r) {
+                    c = prevWeight[0][0].cols();
+                    for(int b = 0; b < outWidthC; b+=c) {
+                        if ((b+c) > outWidthC) {
+                            c = outWidthC - b;
+                        }               
+                        if ((a+r) > outHeightC) {
+                            r = outHeightC - a;
+                        }
+                        tmpPrevWeight[i][j].block(a,b,r,c) = prevWeight[i][j].block(0,0,r,c)/scale;       
+                    }    
                 }
             }
         }
         prevWeight = tmpPrevWeight;
     }
-    
     
     Eigen::MatrixXd tmpDelta = Eigen::MatrixXd::Zero(poolDepth,(outHeightC*outWidthC));
 //    std::cout<<"cols: "<<outHeightC*outWidthC<<"\n";
