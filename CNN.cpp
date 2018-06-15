@@ -219,6 +219,12 @@ int CNN::backprop(Eigen::MatrixXd * input, Eigen::MatrixXd label) {
                     }    
                 }
                 
+                for (int i = 0; i < noOfFilters; i++) {
+                    for (int j = 0; j < poolDepth; j++) {
+                        netLayers.CL[CLpos].bias[i] += (delta(j,0) * learningRate);
+                    }
+                } 
+                
                 CLpos--;
                 break;
             }

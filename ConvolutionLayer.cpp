@@ -85,7 +85,7 @@ Eigen::MatrixXd *  ConvolutionLayer::convolute(Eigen::MatrixXd * input) {
                     Eigen::MatrixXd inputBlock = input[j /*depth*/].block(y,x,filterSize,filterSize);
                     Eigen::Map<Eigen::RowVectorXd> inputBlockV(inputBlock.data(), inputBlock.size());                   
                     output[(j*noOfFilters) + i](y,x) = (inputBlockV.dot(filterV) + bias[i]);   
-                    activatedOut[(j*noOfFilters) + i](y,x) = (inputBlockV.dot(filterV) + bias[i]);
+                    activatedOut[(j*noOfFilters) + i](y,x) = Activation::sigmoid(output[(j*noOfFilters) + i](y,x));
                 }
             }
         }    

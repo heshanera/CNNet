@@ -33,10 +33,10 @@ int main(int argc, char** argv) {
     PL2.poolW = 2;
     
     struct::FCLayStruct FCL1;
-    FCL1.outputs = 10; // neurons in fully connected layer
+    FCL1.outputs = 30; // neurons in fully connected layer
     FCL1.classes = 4; // target classes
     struct::FCLayStruct FCL2;
-    FCL2.outputs = 8; // neurons in fully connected layer
+    FCL2.outputs = 15; // neurons in fully connected layer
     FCL2.classes = 4; // target classes
     struct::FCLayStruct FCL3;
     FCL3.outputs = 5; // neurons in fully connected layer

@@ -55,12 +55,12 @@ public:
     
 private:
     int height, width, padding = 0;
-    double * bias;
     
 public:
     int stride, filterSize;
     int depth, noOfFilters;
     int outHeight, outWidth;
+    double * bias;
     Eigen::MatrixXd ** filters;
     Eigen::MatrixXd * output;
     Eigen::MatrixXd * activatedOut;
