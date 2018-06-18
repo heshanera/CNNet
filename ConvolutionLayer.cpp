@@ -40,7 +40,7 @@ int ConvolutionLayer::initMat() {
     max = 0.01;
     diff = max - min;
     
-    srand(time(NULL));  // if not random numbers are generated in the same order
+//    srand(time(NULL));  // if not random numbers are generated in the same order
     for (int i = 0; i < depth; i++) {
         for (int j = 0; j < noOfFilters; j++) {
             Eigen::MatrixXd filter(filterSize,filterSize);

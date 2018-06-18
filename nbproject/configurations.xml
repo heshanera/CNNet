@@ -7,7 +7,9 @@
       <itemPath>Activation.hpp</itemPath>
       <itemPath>CNN.hpp</itemPath>
       <itemPath>ConvolutionLayer.hpp</itemPath>
+      <itemPath>DataProcessor.h</itemPath>
       <itemPath>FCLayer.hpp</itemPath>
+      <itemPath>FileProcessor.h</itemPath>
       <itemPath>PoolLayer.hpp</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
@@ -20,7 +22,9 @@
       <itemPath>Activation.cpp</itemPath>
       <itemPath>CNN.cpp</itemPath>
       <itemPath>ConvolutionLayer.cpp</itemPath>
+      <itemPath>DataProcessor.cpp</itemPath>
       <itemPath>FCLayer.cpp</itemPath>
+      <itemPath>FileProcessor.cpp</itemPath>
       <itemPath>PoolLayer.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
     </logicalFolder>
@@ -67,9 +71,17 @@
       </item>
       <item path="ConvolutionLayer.hpp" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="DataProcessor.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="DataProcessor.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="FCLayer.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="FCLayer.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FileProcessor.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="FileProcessor.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="PoolLayer.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -110,9 +122,17 @@
       </item>
       <item path="ConvolutionLayer.hpp" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="DataProcessor.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="DataProcessor.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="FCLayer.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="FCLayer.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FileProcessor.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="FileProcessor.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="PoolLayer.cpp" ex="false" tool="1" flavor2="0">
       </item>

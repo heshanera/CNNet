@@ -38,7 +38,9 @@ OBJECTFILES= \
 	${OBJECTDIR}/Activation.o \
 	${OBJECTDIR}/CNN.o \
 	${OBJECTDIR}/ConvolutionLayer.o \
+	${OBJECTDIR}/DataProcessor.o \
 	${OBJECTDIR}/FCLayer.o \
+	${OBJECTDIR}/FileProcessor.o \
 	${OBJECTDIR}/PoolLayer.o \
 	${OBJECTDIR}/main.o
 
@@ -82,10 +84,20 @@ ${OBJECTDIR}/ConvolutionLayer.o: ConvolutionLayer.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ConvolutionLayer.o ConvolutionLayer.cpp
 
+${OBJECTDIR}/DataProcessor.o: DataProcessor.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/DataProcessor.o DataProcessor.cpp
+
 ${OBJECTDIR}/FCLayer.o: FCLayer.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/FCLayer.o FCLayer.cpp
+
+${OBJECTDIR}/FileProcessor.o: FileProcessor.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/FileProcessor.o FileProcessor.cpp
 
 ${OBJECTDIR}/PoolLayer.o: PoolLayer.cpp
 	${MKDIR} -p ${OBJECTDIR}

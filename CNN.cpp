@@ -91,6 +91,7 @@ int CNN::forward(Eigen::MatrixXd * layerInput) {
             {    
 //                std::cout<<"Forward Pass: Convolution Layer"<<CLpos+1<<"...\n";
                 layerInput = netLayers.CL[CLpos].convolute(layerInput);
+//                std::cout<<layerInput[0]<<"*******\n\n";
                 /////////////////////////////////////////////////////////////
                                 
                 // Write convoluted images 
@@ -109,6 +110,7 @@ int CNN::forward(Eigen::MatrixXd * layerInput) {
             {    
 //                std::cout<<"Forward Pass: Pool Layer"<<PLpos+1<<"...\n";
                 layerInput = netLayers.PL[PLpos].pool(layerInput);
+//                std::cout<<layerInput[0]<<"*******\n\n";
                 /////////////////////////////////////////////////////////////
                 // Write pooled results
                 /*       
@@ -126,9 +128,11 @@ int CNN::forward(Eigen::MatrixXd * layerInput) {
             {    
 //                std::cout<<"Forward Pass: Fully Connected Layer"<<FCLpos+1<<"...\n";
                 layerInput = netLayers.FCL[FCLpos].forward(layerInput);
+//                std::cout<<layerInput[0]<<"*******\n\n";
                 FCLpos++;
                 if (FCLpos == netLayers.numFCL) {
                     classPredicts = layerInput[0];
+//                    std::cout<<classPredicts<<"\n******\n";
                 }
                 break;    
             }    
@@ -143,6 +147,11 @@ int CNN::backprop(Eigen::MatrixXd * input, Eigen::MatrixXd label) {
     Eigen::MatrixXd outDeriv = netLayers.FCL[netLayers.numFCL-1].output[0];
     outDeriv = Activation::sigmoidDeriv(outDeriv);
     Eigen::MatrixXd delta = (forwardOut-label).array() * outDeriv.array();
+    
+//    std::cout<<forwardOut<<"\n";
+//    std::cout<<label<<"\n";
+//    std::cout<<outDeriv<<"\n";    
+    std::cout<<delta<<"\n\n";
     
     weights = netLayers.FCL[netLayers.numFCL-1].weights;
     output = netLayers.FCL[netLayers.numFCL-1].output;
@@ -254,7 +263,8 @@ int CNN::backprop(Eigen::MatrixXd * input, Eigen::MatrixXd label) {
                     Eigen::MatrixXd deltaW;
                     if ( layer == (layers-1)) {
                         // error values in each iteration
-                        std::cout<<(delta.sum() / delta.size())<<"\n";
+//                        std::cout<<(delta.sum() / delta.size())<<"\n";
+                        
                         ///////////////////////////////////////////////////////////
                         res = backPropgateLayer(delta, activatedOut);
                         deltaW = std::get<0>(res);
@@ -483,9 +493,9 @@ int CNN::backPropgateToConv(
         row = 0; slide = 0;
         for (int j = 0; j < outWidthC; j++) {
             
-            poolBlock = prevActivOut[i].block(row,slide,poolH,poolH);
+            poolBlock = prevActivOut[i].block(row,slide,poolH,poolW);
             poolBlock = Activation::maxPoolDelta(reshapedPoolOut(i,j),tmpDelta(i,j),poolBlock,poolH,poolW);
-            delta2[i].block(row, slide, poolH, poolH) = poolBlock;
+            delta2[i].block(row, slide, poolH, poolW) = poolBlock;
 
             slide += poolW;
             if (slide >= outWidth) {
@@ -570,10 +580,10 @@ int CNN::train(
 
 Eigen::MatrixXd CNN::predict(Eigen::MatrixXd * input) {
     forward(input);
-    for (int i = 0; i < classPredicts.rows(); i++) {
-        if (classPredicts(i,0) > 0.5 ) classPredicts(i,0) = 1;
-        else classPredicts(i,0) = 0;
-    }
+//    for (int i = 0; i < classPredicts.rows(); i++) {
+//        if (classPredicts(i,0) > 0.5 ) classPredicts(i,0) = 1;
+//        else classPredicts(i,0) = 0;
+//    }
     return classPredicts;
 }
 
