@@ -129,11 +129,12 @@ int CNN::forward(Eigen::MatrixXd * layerInput) {
 //                std::cout<<"Forward Pass: Fully Connected Layer"<<FCLpos+1<<"...\n";
                 layerInput = netLayers.FCL[FCLpos].forward(layerInput);
 //                std::cout<<layerInput[0]<<"*******\n\n";
-                FCLpos++;
-                if (FCLpos == netLayers.numFCL) {
+                if (FCLpos == netLayers.numFCL-1) {
+//                    classPredicts = netLayers.FCL[FCLpos].output[0];
                     classPredicts = layerInput[0];
 //                    std::cout<<classPredicts<<"\n******\n";
                 }
+                FCLpos++;
                 break;    
             }    
         }
@@ -151,7 +152,7 @@ int CNN::backprop(Eigen::MatrixXd * input, Eigen::MatrixXd label) {
 //    std::cout<<forwardOut<<"\n";
 //    std::cout<<label<<"\n";
 //    std::cout<<outDeriv<<"\n";    
-    std::cout<<delta<<"\n\n";
+//    std::cout<<delta<<"\n\n";
     
     weights = netLayers.FCL[netLayers.numFCL-1].weights;
     output = netLayers.FCL[netLayers.numFCL-1].output;
@@ -574,7 +575,7 @@ int CNN::train(
             backprop(inputs[i],labels[i]);
         }    
     }
-    std::cout<<bpError<<"\n";
+//    std::cout<<bpError<<"\n";
     return 0;
 }
 
