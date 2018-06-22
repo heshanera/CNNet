@@ -244,8 +244,8 @@ int net3() {
     int width = 5;
     int height = 1;
     int iterations = 1;
-    int inputSize = 2500;
-    int targetsC = 2;
+    int inputSize = 5000;
+    int targetsC = 1;
     double learningRate = 1;
     
     // network structure
@@ -261,28 +261,22 @@ int net3() {
     PL1.poolW = 1;
     
     struct::FCLayStruct FCL1;
-    FCL1.outputs = 200; // neurons in fully connected layer
+    FCL1.outputs = 4; // neurons in fully connected layer
 
     struct::FCLayStruct FCL2;
-    FCL2.outputs = 100; // neurons in fully connected layer
+    FCL2.outputs = 2; // neurons in fully connected layer
 
     struct::FCLayStruct FCL3;
-    FCL3.outputs = 50; // neurons in fully connected layer
+    FCL3.outputs = 1; // neurons in fully connected layer
     
-    struct::FCLayStruct FCL4;
-    FCL4.outputs = 10; // neurons in fully connected layer
-    
-    struct::FCLayStruct FCL5;
-    FCL5.outputs = 2; // neurons in fully connected layer
-    
-    char layerOrder[] = {/*'C','P',*/'C','P','F','F','F','F','F'};
+    char layerOrder[] = {'C','P','F','F','F'};
     struct::ConvLayStruct CLs[] = {CL1};
     struct::PoolLayStruct PLs[] = {PL1};
-    struct::FCLayStruct FCLs[] = {FCL1,FCL2,FCL3,FCL4,FCL5};
+    struct::FCLayStruct FCLs[] = {FCL1,FCL2,FCL3};
     
     
     struct::NetStruct netStruct;
-    netStruct.layers = 7;
+    netStruct.layers = 5;
     netStruct.layerOrder = layerOrder;
     netStruct.CL = CLs;
     netStruct.PL = PLs;
@@ -310,9 +304,9 @@ int net3() {
     std::vector<double>::const_iterator first = timeSeries[lines].begin();
     std::vector<double>::const_iterator last = timeSeries[lines].begin() + inputSize;
     std::vector<double> targetVector(first, last);
-//    for (std::vector<double>::iterator it = targetVector.begin(); it != targetVector.end(); ++it) {
-//        if (*it == 0) *it = -1;
-//    } 
+    for (std::vector<double>::iterator it = targetVector.begin(); it != targetVector.end(); ++it) {
+        if (*it == 0) *it = -1;
+    } 
 
     for (int i = 0; i < inputSize; i++) {
         
@@ -327,13 +321,14 @@ int net3() {
                 inMat(a,b) = timeSeries[i].at(b);
             }
         }
+        
         inMatArr[i][0] = inMat;
         // labels
         inLbl = Eigen::MatrixXd::Zero(targetsC,1);
         // filling the target vector
         inLbl(0,0) = targetVector.at(i);
-        if (targetVector.at(i) == 1) inLbl(1,0) = 0;
-        else inLbl(1,0) = 1;
+//        if (targetVector.at(i) == 1) inLbl(1,0) = -1;
+//        else inLbl(1,0) = 1;
         inLblArr[i] = inLbl;
     }
     
@@ -362,10 +357,300 @@ int net3() {
         }
         
         prediction = cn.predict(tstMatArr);
-        result = -1; //prediction(0,0);
-        std::cout<<prediction<<"\n\n";
+        result = prediction(0,0);
+//        std::cout<<prediction<<"\n\n";
         
-        if (prediction(0,0) > 0.5) result = 1;
+//        if (prediction(0,0) > 0.5) result = 1;
+        
+        resultVec.push_back(result);
+//        std::cout<<result<<"\n"; 
+
+        if (i == 0){
+            min = result;
+            max = result;
+        } else {
+        
+            if (min > result) min = result;
+            if (max < result) max = result;
+        }
+    }
+    
+    std::cout<<"min: "<<min<<std::endl;
+    std::cout<<"max: "<<max<<std::endl;
+    
+    double line = 0; //(min + max)/2;
+    std::cout<<"margin: "<<line<<std::endl<<std::endl;
+    
+    
+    int occu = 0, notoccu = 0;
+    
+    int corr = 0;
+    int incorr = 0;
+    
+    int truePos = 0;
+    int falsePos = 0;
+    int trueNeg = 0;
+    int falseNeg = 0;
+    
+    int corrNwMgn = 0;
+    int incorrNwMgn = 0;
+    
+    // Open the file to write the time series predictions
+    std::ofstream out_file;
+    std::ofstream out_file2;
+    out_file.open("datasets/multivariate/predictions/occupancyData/multiResults.txt",std::ofstream::out | std::ofstream::trunc);
+    out_file2.open("datasets/multivariate/predictions/occupancyData/multiTargets.txt",std::ofstream::out | std::ofstream::trunc);
+    
+    for (int i = 0; i < predSize; i++) { 
+        out_file<<timeSeries[lines].at(i)<<","<<resultVec.at(i)<<"\n";
+        out_file2<<timeSeries[lines].at(i)<<",";
+        if (timeSeries[lines].at(i) == 1) {
+            out_file2<<1<<"\n";
+        } else out_file2<<-1<<"\n";
+        
+        if ( (resultVec.at(i) > line) && (timeSeries[lines].at(i) == 1)) { 
+            corr++;
+            truePos++;
+            occu++;
+        } else if ( (resultVec.at(i) <= line) && (timeSeries[lines].at(i) == 0)) {
+            corr++;
+            trueNeg++;
+            notoccu++;
+        } else if ( (resultVec.at(i) <= line) && (timeSeries[lines].at(i) == 1)) { 
+            incorr++; 
+            falseNeg++;
+            occu++;
+        } else if ( (resultVec.at(i) > line) && (timeSeries[lines].at(i) == 0)) { 
+            incorr++; 
+            falsePos++;
+            notoccu++;
+        }
+        //std::cout<<resultVec.at(i)<<" ------ "<<timeSeries[lines].at(i)<<"\n";
+        
+    }
+    
+    std::cout<<std::endl;
+    
+    std::cout<<"----------------------"<<std::endl;
+    std::cout<<"Data "<<std::endl;
+    std::cout<<"----------------------"<<std::endl;
+    std::cout<<"Occupied: "<<occu<<std::endl;
+    std::cout<<"NotOccupied: "<<notoccu<<std::endl<<std::endl;
+    
+    std::cout<<"----------------------"<<std::endl;
+    std::cout<<"margin: "<<line<<std::endl;
+    std::cout<<"----------------------"<<std::endl;
+    std::cout<<"Correct predictions: "<<corr<<std::endl;
+    std::cout<<"Incorrect predictions: "<<incorr<<std::endl<<std::endl;
+    
+    std::cout<<"True Positive: "<<truePos<<std::endl;
+    std::cout<<"True Negative: "<<trueNeg<<std::endl;
+    std::cout<<"False Positive: "<<falsePos<<std::endl;
+    std::cout<<"False Negative: "<<falseNeg<<std::endl;
+    
+    std::cout<<std::endl<<"Accuracy: "<<(corr/(double)predSize)*100<<"%"<<std::endl<<std::endl;
+    
+    
+    line = (min + max)/2;
+    occu = 0;
+    notoccu = 0;
+    corr = 0;
+    incorr = 0;
+    truePos = 0;
+    falsePos = 0;
+    trueNeg = 0;
+    falseNeg = 0;
+    
+    for (int i = 0; i < predSize; i++) {    
+        if ( (resultVec.at(i) > line) && (timeSeries[lines].at(i) == 1)) { 
+            corr++;
+            truePos++;
+            occu++;
+        } else if ( (resultVec.at(i) <= line) && (timeSeries[lines].at(i) == 0)) {
+            corr++;
+            trueNeg++;
+            notoccu++;
+        } else if ( (resultVec.at(i) <= line) && (timeSeries[lines].at(i) == 1)) { 
+            incorr++; 
+            falseNeg++;
+            occu++;
+        } else if ( (resultVec.at(i) > line) && (timeSeries[lines].at(i) == 0)) { 
+            incorr++; 
+            falsePos++;
+            notoccu++;
+        }
+        
+        
+        
+        if (line > 0) {
+            if ( (resultVec.at(i) <= line) && (resultVec.at(i) > 0)) {
+                if (timeSeries[lines].at(i) == 0) {
+                    corrNwMgn++;
+                } else incorrNwMgn++;
+            }
+        } else {
+            if ( (resultVec.at(i) > line) && (resultVec.at(i) < 0)) {
+                if (timeSeries[lines].at(i) == 1) {
+                    corrNwMgn++;
+                } else incorrNwMgn++;
+            }
+        }
+        
+    }
+    
+    std::cout<<"----------------------"<<std::endl;
+    std::cout<<"margin: "<<line<<std::endl;
+    std::cout<<"----------------------"<<std::endl;
+    std::cout<<"Correct predictions: "<<corr<<std::endl;
+    std::cout<<"Incorrect predictions: "<<incorr<<std::endl<<std::endl;
+    
+    std::cout<<"True Positive: "<<truePos<<std::endl;
+    std::cout<<"True Negative: "<<trueNeg<<std::endl;
+    std::cout<<"False Positive: "<<falsePos<<std::endl;
+    std::cout<<"False Negative: "<<falseNeg<<std::endl;
+    
+    std::cout<<std::endl<<"Accuracy: "<<(corr/(double)predSize)*100<<"%"<<std::endl<<std::endl;
+    
+    std::cout<<"----------------------"<<std::endl;
+    std::cout<<"Within the new margin and 0"<<std::endl;
+    std::cout<<"----------------------"<<std::endl;
+    std::cout<<"Correct: "<<corrNwMgn<<std::endl;
+    std::cout<<"Incorrect: "<<incorrNwMgn<<std::endl<<std::endl<<std::endl;
+    
+    return 0;
+    
+}
+
+/**
+ * Multivariate Time Series
+ */
+int net4() {
+    
+    // Generating a convolutional network
+    int width = 5;
+    int height = 5;
+    int iterations = 1;
+    int inputSize = 1000;
+    int targetsC = 5;
+    double learningRate = 1;
+    
+    // network structure
+    std::tuple<int, int, int> dimensions = std::make_tuple(1,height,width);
+    
+    struct::ConvLayStruct CL1;
+    CL1.filterSize = 1; // filter size: N x N
+    CL1.filters = 1; // No of filters
+    CL1.stride = 1;
+    
+    struct::PoolLayStruct PL1;
+    PL1.poolH = 1; // pool size: N x N
+    PL1.poolW = 1;
+    
+    struct::FCLayStruct FCL1;
+    FCL1.outputs = 10; // neurons in fully connected layer
+
+    struct::FCLayStruct FCL2;
+    FCL2.outputs = 10; // neurons in fully connected layer
+
+    struct::FCLayStruct FCL3;
+    FCL3.outputs = 5; // neurons in fully connected layer
+    
+    char layerOrder[] = {'C','P','F','F','F'};
+    struct::ConvLayStruct CLs[] = {CL1};
+    struct::PoolLayStruct PLs[] = {PL1};
+    struct::FCLayStruct FCLs[] = {FCL1,FCL2,FCL3};
+    
+    
+    struct::NetStruct netStruct;
+    netStruct.layers = 5;
+    netStruct.layerOrder = layerOrder;
+    netStruct.CL = CLs;
+    netStruct.PL = PLs;
+    netStruct.FCL = FCLs;
+    
+    // Generating input matrices
+    Eigen::MatrixXd ** inMatArr;
+    Eigen::MatrixXd * inLblArr;
+    Eigen::MatrixXd inMat;
+    Eigen::MatrixXd inLbl;
+    inMatArr = new Eigen::MatrixXd * [inputSize];
+    inLblArr = new Eigen::MatrixXd[inputSize];
+    
+    // Reading the file
+    FileProcessor fp;
+    DataProcessor dp;
+    std::vector<double> * timeSeries;
+    
+    int colIndxs[] = {0,0,1,1,1,1,1};
+    int targetValCol = 7;
+    int lines = inputSize;
+    int inputVecSize = 5;
+    timeSeries = fp.readMultivariate("datasets/multivariate/input/occupancyData/datatraining.txt",lines,inputVecSize,colIndxs,targetValCol);
+    
+    std::vector<double>::const_iterator first = timeSeries[lines].begin();
+    std::vector<double>::const_iterator last = timeSeries[lines].begin() + inputSize;
+    std::vector<double> targetVector(first, last);
+    for (std::vector<double>::iterator it = targetVector.begin(); it != targetVector.end(); ++it) {
+        if (*it == 0) *it = -1;
+    } 
+
+    for (int i = 0; i < inputSize; i++) {
+        
+        inMat = Eigen::MatrixXd(height,width);
+        
+        inMatArr[i] = new Eigen::MatrixXd[1]; // image depth
+        for(int j = 0; j < height; j++) {
+            // inputs
+            timeSeries[(i*5) +j] = dp.process(timeSeries[(i*5) +j],0);
+            for (int b = 0; b < width; b++) {
+                inMat(j,b) = timeSeries[(i*5) +j].at(b);
+            }
+        }
+        inMatArr[i][0] = inMat;
+        // labels
+        inLbl = Eigen::MatrixXd::Zero(targetsC,1);
+        // filling the target vector
+        for(int j = 0; j < targetsC; j++) {
+            inLbl(j,0) = targetVector.at(i+j);
+        }        
+        inLblArr[i] = inLbl;
+    }
+
+    // Generating the network
+    CNN cn(dimensions, netStruct);
+    // Training the network
+    cn.train(inMatArr, inLblArr, inputSize, iterations, learningRate);
+    
+    // Predictions
+    std::cout<<"\n Predictions: \n";
+    lines = 100; // lines read from the files
+    timeSeries = fp.readMultivariate("datasets/multivariate/input/occupancyData/datatest.txt",lines,inputVecSize,colIndxs,targetValCol);
+    Eigen::MatrixXd prediction;
+    Eigen::MatrixXd tstMatArr[1];
+    int predSize = 2000;//timeSeries.size() - matSize; // training size 500 points
+    double min = 0, max = 0;
+    double result;
+    std::vector<double> resultVec;
+    for (int i = 0; i < predSize; i++) {
+        tstMatArr[0] = Eigen::MatrixXd::Zero(height,width);
+        timeSeries[i] = dp.process(timeSeries[i],0);
+        for (int a = 0; a < height; a++) {
+            for (int b = 0; b < width; b++) {
+                tstMatArr[0](a,b) = timeSeries[i].at(b);
+            }
+        }
+        
+        prediction = cn.predict(tstMatArr);
+        result = prediction(0,0);
+        
+        std::cout<<prediction(0,0)<<"\n";
+        std::cout<<prediction(1,0)<<"\n";
+        std::cout<<prediction(2,0)<<"\n";
+        std::cout<<prediction(3,0)<<"\n\n";
+        
+//        std::cout<<prediction<<"\n\n";
+        
+//        if (prediction(0,0) > 0.5) result = 1;
         
         resultVec.push_back(result);
 //        std::cout<<result<<"\n"; 
@@ -528,7 +813,7 @@ int net3() {
 
 int main() {
     
-    net3();
+    net4();
     
     return 0;
 }
