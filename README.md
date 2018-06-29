@@ -5,7 +5,7 @@
 
 ## Convolutional Neural Network
 
-CNN is implemented in C++. Eigen library is used for matrix manipulations. Convolution layers, Activation layers, Pooling layers and Fully connected layers are present in the network. The number of Convolution layers, and Pooling layers and number of layers in the fully connected MLP can be adjusted accordingly. sigmoid function is used as the activation. and non overlapping max pooling is used in the pooling layers. Network is trained using gradient decent method. weights and the bias values for the filter matrices and the fully connected layers are initialized randomly.
+CNN is implemented in C++. Eigen library is used for matrix manipulations. Convolution layers, Activation layers, Pooling layers and Fully connected layers are available in the network. The number of Convolution layers, and Pooling layers and number of layers in the fully connected MLP can be adjusted accordingly. sigmoid function is used as the activation. and non overlapping max pooling is used in the pooling layers. Network is trained using gradient decent method. weights and the bias values for the filter matrices and the fully connected layers are initialized randomly.
 
 ## Network Architecture
 
