@@ -9,8 +9,10 @@
         <group>
             <file>file:/home/heshan/Projects/NetBeansProjects/CNNet/CNN.cpp</file>
             <file>file:/home/heshan/Projects/NetBeansProjects/CNNet/FCLayer.cpp</file>
+            <file>file:/home/heshan/Projects/NetBeansProjects/CNNet/Activation.cpp</file>
             <file>file:/home/heshan/Projects/NetBeansProjects/CNNet/main.cpp</file>
             <file>file:/home/heshan/Projects/NetBeansProjects/CNNet/ConvolutionLayer.cpp</file>
+            <file>file:/home/heshan/Projects/NetBeansProjects/CNNet/Activation.hpp</file>
         </group>
     </open-files>
 </project-private>

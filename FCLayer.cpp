@@ -39,7 +39,6 @@ int FCLayer::initMat() {
         weights[i] = new Eigen::MatrixXd[depth];
         for(int j = 0; j < depth; j++) {
             weights[i][j] = Eigen::MatrixXd::Random(height,width);
-            weights[i][j]*0.01;
         }
     }
     return 0;
@@ -72,7 +71,7 @@ Eigen::MatrixXd * FCLayer::forward(Eigen::MatrixXd * input) {
         inputArr<<inputTmpVec, inputV;
     }
     inputVecMat.col(0) = inputArr;
-    output[0] = (weightsVecMat*inputVecMat) + bias;
+    output[0] = (weightsVecMat*inputVecMat) + bias;    
     activatedOut[0] = Activation::sigmoid(output[0]);
     
 //    std::cout<<output<<"\n";

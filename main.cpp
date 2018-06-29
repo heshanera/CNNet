@@ -99,7 +99,8 @@ int net2() {
     double learningRate = 1;
     
     std::string infiles[] = {"dummy2.txt","InternetTraff.txt","dailyMinimumTemperatures.txt"};
-    std::string inFile = infiles[0];
+    std::string infiles2[] = {"dummy2Anml.txt","InternetTraffAnml.txt","dailyMinimumTemperaturesAnml.txt"};
+    std::string inFile = infiles2[1];
     
     // network structure
     std::tuple<int, int, int> dimensions = std::make_tuple(1,height,width);
@@ -204,7 +205,8 @@ int net2() {
     double errorSq = 0, MSE;
     double expected;
     double val;
-    int predSize = 1200;//timeSeries.size() - matSize; // training size 500 points
+    int predSize = 1300;//timeSeries.size() - matSize; // training size 500 points
+    std::vector<double> predictedTimeSeries;
     for (int i = 0; i < predSize; i++) {
         
 //        start = timeSeries.begin() + i;
@@ -222,6 +224,7 @@ int net2() {
         
         prediction = cn.predict(tstMatArr);
         std::cout<<prediction<<"\n"; 
+        predictedTimeSeries.push_back(prediction(0,0));
         expected = timeSeries.at(i + (width*height));
         for (int i = 0; i < targetsC; i++) {
             val = prediction(i,0);
@@ -229,8 +232,25 @@ int net2() {
             out_file<<dp.postProcess(val)<<"\n"; 
         }
     }
+    out_file.close();
     MSE = errorSq/predSize;
     std::cout<<"\nMean Squared Error: "<<MSE<<"\n\n";
+     
+    /** writing the normalized predicted time series **/
+    predictedTimeSeries = dp.process(predictedTimeSeries, 0);
+    
+    out_file.open("datasets/univariate/predictions/normPred"+inFile,std::ofstream::out | std::ofstream::trunc);
+    for (int i = 0; i < predictedTimeSeries.size(); i++) {
+        out_file<<(((predictedTimeSeries.at(i)-0.02773)*11000)-0.035)<<"\n";
+    }
+    out_file.close();
+    out_file.open("datasets/univariate/predictions/normInit"+inFile,std::ofstream::out | std::ofstream::trunc);
+    for (int i = 0; i < predictedTimeSeries.size(); i++) {
+        out_file<<timeSeries.at(i+inputMatSize)<<"\n";
+    }
+    out_file.close();
+    
+    
     
     return 0;
 }
@@ -343,7 +363,7 @@ int net3() {
     timeSeries = fp.readMultivariate("datasets/multivariate/input/occupancyData/datatest.txt",lines,inputVecSize,colIndxs,targetValCol);
     Eigen::MatrixXd prediction;
     Eigen::MatrixXd tstMatArr[1];
-    int predSize = 2000;//timeSeries.size() - matSize; // training size 500 points
+    int predSize = 2000;
     double min = 0, max = 0;
     double result;
     std::vector<double> resultVec;
@@ -547,22 +567,25 @@ int net4() {
     PL1.poolW = 1;
     
     struct::FCLayStruct FCL1;
-    FCL1.outputs = 10; // neurons in fully connected layer
+    FCL1.outputs = 80; // neurons in fully connected layer
 
     struct::FCLayStruct FCL2;
-    FCL2.outputs = 10; // neurons in fully connected layer
+    FCL2.outputs = 50; // neurons in fully connected layer
 
     struct::FCLayStruct FCL3;
-    FCL3.outputs = 5; // neurons in fully connected layer
+    FCL3.outputs = 10; // neurons in fully connected layer
     
-    char layerOrder[] = {'C','P','F','F','F'};
+    struct::FCLayStruct FCL4;
+    FCL4.outputs = 5; // neurons in fully connected layer
+    
+    char layerOrder[] = {'C','P','F','F','F','F'};
     struct::ConvLayStruct CLs[] = {CL1};
     struct::PoolLayStruct PLs[] = {PL1};
-    struct::FCLayStruct FCLs[] = {FCL1,FCL2,FCL3};
+    struct::FCLayStruct FCLs[] = {FCL1,FCL2,FCL3,FCL4};
     
     
     struct::NetStruct netStruct;
-    netStruct.layers = 5;
+    netStruct.layers = 6;
     netStruct.layerOrder = layerOrder;
     netStruct.CL = CLs;
     netStruct.PL = PLs;
@@ -583,12 +606,12 @@ int net4() {
     
     int colIndxs[] = {0,0,1,1,1,1,1};
     int targetValCol = 7;
-    int lines = inputSize;
+    int lines = 5000;
     int inputVecSize = 5;
     timeSeries = fp.readMultivariate("datasets/multivariate/input/occupancyData/datatraining.txt",lines,inputVecSize,colIndxs,targetValCol);
     
     std::vector<double>::const_iterator first = timeSeries[lines].begin();
-    std::vector<double>::const_iterator last = timeSeries[lines].begin() + inputSize;
+    std::vector<double>::const_iterator last = timeSeries[lines].begin() + lines;
     std::vector<double> targetVector(first, last);
     for (std::vector<double>::iterator it = targetVector.begin(); it != targetVector.end(); ++it) {
         if (*it == 0) *it = -1;
@@ -597,10 +620,9 @@ int net4() {
     for (int i = 0; i < inputSize; i++) {
         
         inMat = Eigen::MatrixXd(height,width);
-        
+        // inputs
         inMatArr[i] = new Eigen::MatrixXd[1]; // image depth
         for(int j = 0; j < height; j++) {
-            // inputs
             timeSeries[(i*5) +j] = dp.process(timeSeries[(i*5) +j],0);
             for (int b = 0; b < width; b++) {
                 inMat(j,b) = timeSeries[(i*5) +j].at(b);
@@ -623,47 +645,42 @@ int net4() {
     
     // Predictions
     std::cout<<"\n Predictions: \n";
-    lines = 100; // lines read from the files
+    lines = 2000; // lines read from the files
     timeSeries = fp.readMultivariate("datasets/multivariate/input/occupancyData/datatest.txt",lines,inputVecSize,colIndxs,targetValCol);
     Eigen::MatrixXd prediction;
     Eigen::MatrixXd tstMatArr[1];
-    int predSize = 2000;//timeSeries.size() - matSize; // training size 500 points
+    int predSize = 400;
     double min = 0, max = 0;
     double result;
     std::vector<double> resultVec;
     for (int i = 0; i < predSize; i++) {
         tstMatArr[0] = Eigen::MatrixXd::Zero(height,width);
-        timeSeries[i] = dp.process(timeSeries[i],0);
-        for (int a = 0; a < height; a++) {
+        // inputs
+        for(int j = 0; j < height; j++) {
+            timeSeries[(i*5) +j] = dp.process(timeSeries[(i*5) +j],0);
             for (int b = 0; b < width; b++) {
-                tstMatArr[0](a,b) = timeSeries[i].at(b);
+                tstMatArr[0](j,b) = timeSeries[(i*5) +j].at(b);
             }
         }
         
         prediction = cn.predict(tstMatArr);
-        result = prediction(0,0);
         
-        std::cout<<prediction(0,0)<<"\n";
-        std::cout<<prediction(1,0)<<"\n";
-        std::cout<<prediction(2,0)<<"\n";
-        std::cout<<prediction(3,0)<<"\n\n";
-        
-//        std::cout<<prediction<<"\n\n";
-        
-//        if (prediction(0,0) > 0.5) result = 1;
-        
-        resultVec.push_back(result);
-//        std::cout<<result<<"\n"; 
+        for (int j = 0; j < targetsC; j++) {
+            result = prediction(j,0);
+            resultVec.push_back(result);
+            if (i == 0){
+                min = result;
+                max = result;
+            } else {
 
-        if (i == 0){
-            min = result;
-            max = result;
-        } else {
-        
-            if (min > result) min = result;
-            if (max < result) max = result;
+                if (min > result) min = result;
+                if (max < result) max = result;
+            }
         }
+        
     }
+    
+    predSize *= targetsC;
     
     std::cout<<"min: "<<min<<std::endl;
     std::cout<<"max: "<<max<<std::endl;
@@ -813,7 +830,7 @@ int net4() {
 
 int main() {
     
-    net4();
+    net2();
     
     return 0;
 }
