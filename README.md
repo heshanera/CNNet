@@ -77,7 +77,7 @@ cnn.train(inImgArr, inLblArr, inputSize, iterations, learningRate);
 ```
 double result;
 Eigen::MatrixXd input[1];
-result = cnn.predict(input)<<"\n";
+result = cnn.predict(input);
 ```
 
 ## Predictions ( Normalized values )
