@@ -87,7 +87,3 @@ result = cnn.predict(input);
 
 ![prediction](https://github.com/heshanera/CNNet/blob/master/imgs/timeSeries/Daily%20Minimum%20Temperature.png)
 *Daily minimum temperatures in Melbourne, Australia, 1981-1990*<br><br><br>
-
-![prediction](https://github.com/heshanera/CNNet/blob/master/imgs/timeSeries/Network%20Traffic.png)
-*Internet traffic data (in bits) from an ISP. Aggregated traffic in the United Kingdom academic network backbone. It was collected between 19 November 2004, at 09:30 hours and 27 January 2005, at 11:11 hours. Hourly data*
-
