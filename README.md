@@ -79,11 +79,3 @@ double result;
 Eigen::MatrixXd input[1];
 result = cnn.predict(input);
 ```
-
-## Predictions ( Normalized values )
-
-![prediction](https://github.com/heshanera/CNNet/blob/master/imgs/timeSeries/Sea%20Level%20Pressure.png)
-*The sea level pressure dataset for Darwin from the Climate Prediction Center*<br><br><br>
-
-![prediction](https://github.com/heshanera/CNNet/blob/master/imgs/timeSeries/Daily%20Minimum%20Temperature.png)
-*Daily minimum temperatures in Melbourne, Australia, 1981-1990*<br><br><br>
