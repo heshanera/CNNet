@@ -16,7 +16,7 @@ CNN is implemented in C++. Eigen library is used for matrix manipulations. Convo
 
 ###### initializing the layers
 
-```
+```cpp
 int width = 20;
 int height = 20;
 
@@ -59,12 +59,12 @@ netStruct.FCL = FCLs;
 ```
 
 ###### Initializing the network
-```
+```cpp
 CNN cnn(dimensions, netStruct);
 ```
 
 ###### Training
-```
+```cpp
 Eigen::MatrixXd ** inImgArr;
 Eigen::MatrixXd * inLblArr;
 int iterations = 20;
@@ -74,7 +74,7 @@ cnn.train(inImgArr, inLblArr, inputSize, iterations, learningRate);
 ```
 
 ###### Testing
-```
+```cpp
 double result;
 Eigen::MatrixXd input[1];
 result = cnn.predict(input);
